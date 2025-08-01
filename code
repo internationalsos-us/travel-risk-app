@@ -1,0 +1,93 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+
+# -------------------------
+# Load Probability Data
+# -------------------------
+# Replace with the path to your Excel file
+@st.cache_data
+def load_data():
+    df = pd.read_excel("Trip and cases report 2023-2025.xlsx", sheet_name=0)
+    return df
+
+data = load_data()
+
+# -------------------------
+# App UI
+# -------------------------
+st.set_page_config(page_title="Travel Risk Probability Calculator", layout="centered")
+st.title("🌍 Travel Risk Probability Calculator")
+st.write("Estimate potential assistance cases based on your travelers.")
+
+# Input fields
+st.header("Enter Traveler Information")
+countries = []
+traveler_counts = []
+
+for i in range(1, 4):
+    col1, col2 = st.columns(2)
+    with col1:
+        country = st.text_input(f"Country {i}", "")
+    with col2:
+        travelers = st.number_input(f"Number of Travelers for {country or f'Country {i}'}", min_value=0, value=0, step=1)
+    if country:
+        countries.append(country.strip())
+        traveler_counts.append(travelers)
+
+# -------------------------
+# Calculations
+# -------------------------
+results = []
+for country, travelers in zip(countries, traveler_counts):
+    # Find case probability per traveler from your Excel
+    row = data[data["Country"].str.contains(country, case=False, na=False)]
+    if not row.empty:
+        prob_per_traveler = row.iloc[0]["Cases per Traveler"]  # adjust column name
+        estimated_cases = travelers * prob_per_traveler
+        results.append({"Country": country, "Travelers": travelers, "Estimated Cases": estimated_cases})
+    else:
+        results.append({"Country": country, "Travelers": travelers, "Estimated Cases": 0})
+
+results_df = pd.DataFrame(results)
+
+if not results_df.empty:
+    st.subheader("Results Overview")
+    total_cases = results_df["Estimated Cases"].sum()
+    st.metric("Total Estimated Cases", f"{total_cases:.0f}")
+
+    # Bar chart by country
+    fig = px.bar(results_df, x="Country", y="Estimated Cases", text="Estimated Cases",
+                 title="Estimated Cases by Country")
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Pie chart overall
+    fig2 = px.pie(results_df, values="Estimated Cases", names="Country", title="Case Distribution by Country")
+    st.plotly_chart(fig2, use_container_width=True)
+
+    # -------------------------
+    # PDF Report Download
+    # -------------------------
+    def create_pdf(dataframe, total_cases):
+        buffer = BytesIO()
+        c = canvas.Canvas(buffer, pagesize=letter)
+        c.setFont("Helvetica", 14)
+        c.drawString(30, 750, "Travel Risk Probability Report")
+        c.setFont("Helvetica", 12)
+        c.drawString(30, 730, f"Total Estimated Cases: {int(total_cases)}")
+        y = 700
+        for _, row in dataframe.iterrows():
+            c.drawString(30, y, f"{row['Country']}: {int(row['Estimated Cases'])} cases "
+                                f"from {int(row['Travelers'])} travelers")
+            y -= 20
+        c.showPage()
+        c.save()
+        buffer.seek(0)
+        return buffer
+
+    pdf_buffer = create_pdf(results_df, total_cases)
+    st.download_button("📄 Download Full PDF Report", data=pdf_buffer, file_name="travel_risk_report.pdf",
+                       mime="application/pdf")
