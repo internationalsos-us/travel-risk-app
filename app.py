@@ -1,10 +1,12 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import matplotlib.pyplot as plt
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
+from reportlab.lib import colors
 import requests
 
 # -------------------------
@@ -20,14 +22,14 @@ data = load_data()
 case_columns = [col for col in data.columns if "Probability" in col]
 
 # -------------------------
-# Streamlit Page Config
+# Page Config
 # -------------------------
 st.set_page_config(page_title="International SOS | Assistance & Travel Risks", layout="wide")
 
 # -------------------------
-# Top Banner with Logo
+# Banner with Logo
 # -------------------------
-logo_url = "https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7Bfbdb84ee-e7f6-4acf-99bb-e59416ae6fda%7D_int.sos_logo.png"
+logo_url = "https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png"
 st.markdown(f"""
 <div style="background-color:#232762; padding:20px; display:flex; align-items:center;">
     <img src="{logo_url}" alt="International SOS" style="height:60px; margin-right:20px;">
@@ -65,7 +67,7 @@ if countries:
         if not row.empty:
             case_data, total_cases = {}, 0
             for col in case_columns:
-                prob = row.iloc[0][col]  # Excel already decimal (e.g. 0.125 for 12.5%)
+                prob = row.iloc[0][col]  # Excel already decimal
                 estimated = travelers * prob
                 case_data[col.replace(" Case Probability", "")] = estimated
                 total_cases += estimated
@@ -98,31 +100,37 @@ if countries:
         case_totals.columns = ["Case Type", "Estimated Cases"]
 
         st.markdown("### Case Type Breakdown (Overall)")
+        brand_colors = ["#2f4696", "#009354", "#FFD744", "#DD2484", "#6988C0", "#6C206B", "#EF820F", "#D4002C", "#EEEFEF"]
         fig2 = px.pie(case_totals, values="Estimated Cases", names="Case Type",
-                      color_discrete_sequence=px.colors.qualitative.Set3)
+                      color_discrete_sequence=brand_colors)
         st.plotly_chart(fig2, use_container_width=True)
 
         # -------------------------
         # Glossary Sections
         # -------------------------
-        st.markdown("## Medical Sub-Risks Glossary")
-        st.write("""
+        st.markdown("## Glossaries")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown('<h3 style="color:#2f4696;">Medical Sub-Risks Glossary</h3>', unsafe_allow_html=True)
+            st.write("""
 - **Excellent**: International standard  
 - **Good**: High standard, especially in major cities  
 - **Variable**: Quality varies; lower outside major cities  
 - **Limited**: Specialist care limited; evacuations may be required  
 - **Poor**: Basic care lacking; serious conditions require evacuation  
-        """)
+            """)
 
-        st.markdown("## Travel Security Sub-Risks Glossary")
-        st.write("""
+        with col2:
+            st.markdown('<h3 style="color:#009354;">Travel Security Sub-Risks Glossary</h3>', unsafe_allow_html=True)
+            st.write("""
 - **Protests**: May be disruptive or violent  
 - **Crime**: Can occur in many areas, sometimes violent  
 - **Transport**: Few reliable or safe options in some areas  
 - **Terrorism/Conflict**: Can pose direct risks in certain regions  
 - **Natural Hazards**: Can cause significant disruption  
 - **Cultural Issues**: Non-compliance may result in legal or physical consequences  
-        """)
+            """)
 
         # -------------------------
         # PDF Output
@@ -133,7 +141,7 @@ if countries:
 
             # Banner with Logo
             logo = ImageReader(requests.get(logo_url, stream=True).raw)
-            c.setFillColorRGB(35/255, 39/255, 98/255)  # Banner color
+            c.setFillColorRGB(35/255, 39/255, 98/255)
             c.rect(0, 750, 612, 50, fill=True, stroke=False)
             c.drawImage(logo, 30, 755, height=40, preserveAspectRatio=True, mask='auto')
             c.setFillColorRGB(1,1,1)
@@ -149,31 +157,34 @@ if countries:
             c.drawString(30, 680, f"Total Estimated Cases: {total_cases:.2f}")
             c.drawString(30, 660, f"Countries Analyzed: {', '.join(dataframe['Country'])}")
 
-            # Country Breakdown
-            y = 630
-            c.setFont("Helvetica-Bold", 14)
-            c.drawString(30, y, "Estimated Cases by Country")
-            y -= 20
-            c.setFont("Helvetica", 12)
-            for _, row in dataframe.iterrows():
-                c.drawString(30, y, f"{row['Country']}: {row['Total Cases']:.2f} cases "
-                                    f"(from {int(row['Travelers'])} travelers)")
-                y -= 20
+            # Charts
+            # Country Bar Chart
+            plt.figure(figsize=(5,3))
+            plt.bar(dataframe["Country"], dataframe["Total Cases"], color="#2f4696")
+            plt.title("Estimated Cases by Country")
+            plt.tight_layout()
+            bar_buf = BytesIO()
+            plt.savefig(bar_buf, format="png")
+            bar_buf.seek(0)
+            c.drawImage(ImageReader(bar_buf), 50, 400, width=500, height=200)
 
-            # Case Types
-            y -= 20
-            c.setFont("Helvetica-Bold", 14)
-            c.drawString(30, y, "Case Type Breakdown (Overall)")
-            y -= 20
-            c.setFont("Helvetica", 12)
-            for _, row in case_totals.iterrows():
-                c.drawString(30, y, f"{row['Case Type']}: {row['Estimated Cases']:.2f} cases")
-                y -= 20
+            # Pie Chart
+            plt.figure(figsize=(5,3))
+            plt.pie(case_totals["Estimated Cases"], labels=case_totals["Case Type"], autopct="%.1f%%",
+                    colors=brand_colors[:len(case_totals)])
+            plt.title("Case Type Breakdown (Overall)")
+            pie_buf = BytesIO()
+            plt.savefig(pie_buf, format="png")
+            pie_buf.seek(0)
+            c.drawImage(ImageReader(pie_buf), 50, 150, width=500, height=200)
+
+            c.showPage()
 
             # Glossaries
-            c.showPage()
             c.setFont("Helvetica-Bold", 16)
+            c.setFillColorRGB(47/255,70/255,150/255)  # Medical color
             c.drawString(30, 770, "Medical Sub-Risks Glossary")
+            c.setFillColorRGB(0,0,0)
             c.setFont("Helvetica", 12)
             c.drawString(30, 740, "Excellent: International standard")
             c.drawString(30, 725, "Good: High standard in major cities")
@@ -181,25 +192,67 @@ if countries:
             c.drawString(30, 695, "Limited: Specialist care limited; evacuations may be required")
             c.drawString(30, 680, "Poor: Basic care lacking; serious conditions require evacuation")
 
-            y = 640
+            c.setFillColorRGB(0/255,147/255,84/255)  # Security color
             c.setFont("Helvetica-Bold", 16)
-            c.drawString(30, y, "Travel Security Sub-Risks Glossary")
+            c.drawString(300, 770, "Travel Security Sub-Risks Glossary")
+            c.setFillColorRGB(0,0,0)
             c.setFont("Helvetica", 12)
-            c.drawString(30, y-30, "Protests: May be disruptive or violent")
-            c.drawString(30, y-45, "Crime: Occurs in many areas, sometimes violent")
-            c.drawString(30, y-60, "Transport: Few reliable or safe options")
-            c.drawString(30, y-75, "Terrorism/Conflict: Direct risks possible")
-            c.drawString(30, y-90, "Natural Hazards: Can cause significant disruption")
-            c.drawString(30, y-105, "Cultural Issues: Non-compliance may result in legal/physical consequences")
+            y = 740
+            glossary_items = [
+                "Protests: May be disruptive or violent",
+                "Crime: Occurs in many areas, sometimes violent",
+                "Transport: Few reliable or safe options",
+                "Terrorism/Conflict: Direct risks possible",
+                "Natural Hazards: Can cause significant disruption",
+                "Cultural Issues: Non-compliance may result in consequences"
+            ]
+            for item in glossary_items:
+                c.drawString(300, y, item)
+                y -= 20
 
             # Disclaimer
             c.setFont("Helvetica-Oblique", 9)
-            c.drawString(30, 40, "This report is for general educational purposes only. Source: International SOS data.")
+            c.drawString(30, 40, "This report is for educational purposes only. Actual assistance cases may vary.")
+            c.drawString(30, 30, "Source: International SOS data.")
 
             c.save()
             buffer.seek(0)
             return buffer
 
         pdf_buffer = create_pdf(results_df, total_cases, case_totals)
-        st.download_button("📄 Step 3: Download Full PDF Report", data=pdf_buffer,
-                           file_name="travel_risk_report.pdf", mime="application/pdf")
+        st.download_button("📄 Download the PDF Report", data=pdf_buffer,
+                           file_name="travel_risk_report.pdf", mime="application/pdf",
+                           use_container_width=True,
+                           key="pdf_download")
+
+        # Custom styling for download button
+        st.markdown("""
+        <style>
+        div[data-testid="stDownloadButton"] button {
+            background-color: #2f4696;
+            color: white;
+            font-weight: bold;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+# -------------------------
+# Bottom CTA Section
+# -------------------------
+st.markdown(f"""
+<div style="background-color:#232762; padding:40px; text-align:center;">
+    <h2 style="color:white;">How we can support</h2>
+    <p style="color:white; font-size:16px; max-width:700px; margin:auto;">
+    Protecting your people from health and security threats. 
+    Our comprehensive Travel Risk Management program supports both managers and employees by proactively 
+    identifying, alerting, and managing medical, security, mental wellbeing, and logistical risks.
+    </p>
+    <a href="https://www.internationalsos.com/get-in-touch?utm_source=riskreport" 
+       target="_blank">
+       <button style="background-color:#EF820F; color:white; font-weight:bold; 
+                      border:none; padding:15px 30px; font-size:16px; cursor:pointer;">
+            Get in Touch
+       </button>
+    </a>
+</div>
+""", unsafe_allow_html=True)
