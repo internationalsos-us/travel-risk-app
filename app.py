@@ -198,6 +198,7 @@ st.markdown("""
 - **Cultural Issues**: Non-compliance may result in legal or physical consequences  
             """)
 
+
         # -------------------------
         # PDF Generation
         # -------------------------
