@@ -140,21 +140,36 @@ International SOS can help you:
 - **Fulfill your Duty of Care** by aligning with global standards like ISO 31030.  
         """)
 
-        # -------------------------
-        # Risk Outlook Section
-        # -------------------------
-        st.markdown("## Explore the Risk Outlook 2025 Report")
-        col_img, col_txt = st.columns([1,2])
-        with col_img:
-            st.image("https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7")
-        with col_txt:
-            st.markdown("""
-The **Risk Outlook 2025** is our flagship annual study, providing actionable insights into the key medical and security 
-challenges facing organizations worldwide. Developed with expert analysis and global data, it helps leaders prepare 
-for the unexpected and safeguard their workforce.
+# -------------------------
+# Risk Outlook Section
+# -------------------------
+st.markdown("""
+<div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
+    <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
+    <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:300px; text-align:center;">
+            <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
+                 alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
+        </div>
+        <div style="flex:1; min-width:300px;">
+            <p style="font-size:16px; line-height:1.6; color:#333;">
+                The <b>Risk Outlook 2025</b> is our flagship annual study, providing actionable insights into the key medical and security 
+                challenges facing organizations worldwide. Developed with expert analysis and global data, it helps leaders prepare 
+                for the unexpected and safeguard their workforce.
+            </p>
+            <p style="text-align:left; margin-top:20px;">
+                <a href="https://www.internationalsos.com/risk-outlook?utm_source=riskreport" target="_blank"
+                   style="background-color:white; color:#2f4696; font-weight:bold; 
+                          padding:12px 24px; text-decoration:none; border:2px solid #2f4696;
+                          border-radius:20px; display:inline-block;">
+                    📘 Access the Risk Outlook 2025 Report
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-👉 [Access the Risk Outlook 2025 Report](https://www.internationalsos.com/risk-outlook?utm_source=riskreport)
-            """)
 
         # -------------------------
         # Glossaries
