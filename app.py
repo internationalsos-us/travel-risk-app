@@ -27,54 +27,56 @@ st.set_page_config(page_title="International SOS | Assistance & Travel Risks", l
 
 # -------------------------
 # -------------------------
+# -------------------------
 # Banner with Logo (Title Left Desktop, Logo Above Mobile)
 # -------------------------
-st.markdown(f"""
+st.markdown("""
 <style>
-.banner-container {{
+.banner-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     background-color: #232762;
     padding: 20px;
-}}
-.banner-title {{
-    color: white;
+}
+.banner-title {
+    color: white !important;
     margin: 0;
     flex: 1;
     min-width: 250px;
     font-size: 28px;
     order: 1;
     text-align: left;
-}}
-.banner-logo {{
+}
+.banner-logo {
     flex: 0;
     min-width: 200px;
     margin-left: 20px;
     order: 2;
-}}
-@media (max-width: 768px) {{
-    .banner-container {{
+}
+@media (max-width: 768px) {
+    .banner-container {
         flex-direction: column;
         text-align: center;
-    }}
-    .banner-logo {{
+    }
+    .banner-logo {
         order: 0; /* logo goes first */
         margin: 0 0 15px 0;
-    }}
-    .banner-title {{
+    }
+    .banner-title {
         order: 1; /* title comes second */
         font-size: 22px;
         text-align: center;
-        color: white; /* ensure text stays white */
-    }}
-}}
+        color: white !important; /* force white text */
+    }
+}
 </style>
 
 <div class="banner-container">
     <div class="banner-logo">
-        <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png" alt="International SOS" style="height:60px; max-width:100%;">
+        <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png"
+             alt="International SOS" style="height:60px; max-width:100%;">
     </div>
     <h1 class="banner-title">
         Assistance and Travel Risks Simulation Report
