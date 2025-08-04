@@ -140,10 +140,10 @@ International SOS can help you:
 - **Fulfill your Duty of Care** by aligning with global standards like ISO 31030.  
         """)
 
-# -------------------------
-# Risk Outlook Section
-# -------------------------
-st.markdown("""
+        # -------------------------
+        # Risk Outlook Section
+        # -------------------------
+        st.markdown("""
 <div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
     <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
     <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
@@ -169,7 +169,6 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
 
         # -------------------------
         # Glossaries
@@ -197,7 +196,6 @@ st.markdown("""
 - **Natural Hazards**: Can cause significant disruption  
 - **Cultural Issues**: Non-compliance may result in legal or physical consequences  
             """)
-
 
         # -------------------------
         # PDF Generation
@@ -287,56 +285,4 @@ st.markdown("""
             # Footer
             c.setFont("Helvetica-Oblique", 9)
             c.drawString(30, 40, "This report is for educational purposes only. Actual assistance cases may vary.")
-            c.drawString(30, 30, "© 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.")
-
-            c.save()
-            buffer.seek(0)
-            return buffer
-
-        pdf_buffer = create_pdf(results_df, total_cases, case_totals)
-        st.download_button("📄 Download the PDF Report", data=pdf_buffer,
-                           file_name="travel_risk_report.pdf", mime="application/pdf",
-                           key="pdf_download")
-
-        st.markdown("""
-        <style>
-        div[data-testid="stDownloadButton"] button {
-            background-color: #2f4696;
-            color: white;
-            font-weight: bold;
-            border-radius: 8px;
-            width: auto;
-            display: inline-block;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-# -------------------------
-# Bottom CTA Section
-# -------------------------
-st.markdown(f"""
-<div style="background-color:#232762; padding:40px; text-align:center;">
-    <h2 style="color:white;">How we can support</h2>
-    <p style="color:white; font-size:16px; max-width:700px; margin:auto; margin-bottom:20px;">
-    Protecting your people from health and security threats. 
-    Our comprehensive Travel Risk Management program supports both managers and employees by proactively 
-    identifying, alerting, and managing medical, security, mental wellbeing, and logistical risks.
-    </p>
-    <a href="https://www.internationalsos.com/get-in-touch?utm_source=riskreport" target="_blank">
-       <button style="background-color:#EF820F; color:white; font-weight:bold; 
-                      border:none; padding:15px 30px; font-size:16px; cursor:pointer; 
-                      margin-top:15px; border-radius:20px;">
-            Get in Touch
-       </button>
-    </a>
-</div>
-""", unsafe_allow_html=True)
-
-# -------------------------
-# Footer
-# -------------------------
-st.markdown("""
-<div style="text-align:center; font-size:12px; color:gray; margin-top:20px;">
-© 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.
-</div>
-""", unsafe_allow_html=True)
+            c.drawString(3
