@@ -26,30 +26,57 @@ case_columns = [col for col in data.columns if "Probability" in col]
 st.set_page_config(page_title="International SOS | Assistance & Travel Risks", layout="wide")
 
 # -------------------------
-# Banner with Logo (Logo Above on Mobile)
+# Banner with Logo (Title Left on Desktop, Logo Above on Mobile)
 # -------------------------
 st.markdown(f"""
 <style>
+.banner-container {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    background-color: #232762;
+    padding: 20px;
+}}
+.banner-title {{
+    color: white;
+    margin: 0;
+    flex: 1;
+    min-width: 250px;
+    font-size: 28px;
+    order: 1;
+    text-align: left;
+}}
+.banner-logo {{
+    flex: 0;
+    min-width: 200px;
+    margin-left: 20px;
+    order: 2;
+}}
 @media (max-width: 768px) {{
     .banner-container {{
-        flex-direction: column-reverse !important;
+        flex-direction: column;
         text-align: center;
     }}
-    .banner-container h1 {{
-        margin-top: 15px;
+    .banner-logo {{
+        order: 1;
+        margin: 0 0 15px 0;
+    }}
+    .banner-title {{
+        order: 2;
+        font-size: 22px;
+        text-align: center;
     }}
 }}
 </style>
 
-<div class="banner-container" 
-     style="background-color:#232762; padding:20px; display:flex; justify-content:space-between; 
-            align-items:center; flex-wrap:wrap;">
-    <div style="flex:0; min-width:200px; margin-bottom:10px;">
-        <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png" alt="International SOS" style="height:60px; max-width:100%;">
-    </div>
-    <h1 style="color:white; margin:0; flex:1; min-width:250px; font-size:28px;">
+<div class="banner-container">
+    <h1 class="banner-title">
         Assistance and Travel Risks Simulation Report
     </h1>
+    <div class="banner-logo">
+        <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png" alt="International SOS" style="height:60px; max-width:100%;">
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
