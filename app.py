@@ -232,21 +232,20 @@ if countries:
         pdf_buffer = create_pdf(results_df, total_cases, case_totals)
         st.download_button("📄 Download the PDF Report", data=pdf_buffer,
                            file_name="travel_risk_report.pdf", mime="application/pdf",
-                           use_container_width=True, key="pdf_download")
+                           key="pdf_download")
 
         st.markdown("""
-<style>
-div[data-testid="stDownloadButton"] button {
-    background-color: #2f4696;
-    color: white;
-    font-weight: bold;
-    border-radius: 8px;
-    width: auto; /* prevents full-width */
-    display: inline-block;
-}
-</style>
-""", unsafe_allow_html=True)
-
+        <style>
+        div[data-testid="stDownloadButton"] button {
+            background-color: #2f4696;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            width: auto;
+            display: inline-block;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
 # -------------------------
 # Bottom CTA Section
@@ -261,11 +260,10 @@ st.markdown(f"""
     </p>
     <a href="https://www.internationalsos.com/get-in-touch?utm_source=riskreport" target="_blank">
        <button style="background-color:#EF820F; color:white; font-weight:bold; 
-               border:none; padding:15px 30px; font-size:16px; cursor:pointer; 
-               margin-top:15px; border-radius:20px;">
-    Get in Touch
-</button>
-
+                      border:none; padding:15px 30px; font-size:16px; cursor:pointer; 
+                      margin-top:15px; border-radius:20px;">
+            Get in Touch
+       </button>
     </a>
 </div>
 """, unsafe_allow_html=True)
