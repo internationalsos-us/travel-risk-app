@@ -253,7 +253,10 @@ International SOS can help you:
             c = canvas.Canvas(buffer, pagesize=letter)
 
             # Banner with Logo
-            logo = ImageReader(requests.get(logo_url, stream=True).raw)
+            logo = ImageReader(requests.get(
+    "https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png",
+    stream=True
+).raw)
             c.setFillColorRGB(35/255, 39/255, 98/255)
             c.rect(0, 750, 612, 50, fill=True, stroke=False)
             c.drawImage(logo, 30, 755, height=40, preserveAspectRatio=True, mask='auto')
