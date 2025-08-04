@@ -46,16 +46,19 @@ st.markdown("## Step 1: Enter Traveler Data")
 st.write("Provide up to three destination countries with expected traveler volumes.")
 
 countries, traveler_counts = [], []
+country_options = sorted(data["Country"].dropna().unique())
+
 for i in range(1, 4):
     col1, col2 = st.columns([2,1])
     with col1:
-        country = st.text_input(f"Destination Country {i}", "")
+        country = st.selectbox(f"Destination Country {i}", [""] + list(country_options), key=f"country{i}")
     with col2:
         travelers = st.number_input(f"Travelers for {country or f'Country {i}'}",
                                     min_value=0, value=0, step=1, key=f"trav{i}")
     if country:
-        countries.append(country.strip())
+        countries.append(country)
         traveler_counts.append(travelers)
+
 
 if countries:
     # -------------------------
