@@ -6,7 +6,6 @@ from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
-from reportlab.lib import colors
 import requests
 
 # -------------------------
@@ -43,12 +42,23 @@ st.write("")
 # Input Section
 # -------------------------
 st.markdown("## Step 1: Enter Traveler Data")
-st.write("Provide up to three destination countries with expected traveler volumes.")
+st.write("Select countries and input traveler volumes. Add more countries if needed.")
 
 countries, traveler_counts = [], []
 country_options = sorted(data["Country"].dropna().unique())
 
-for i in range(1, 4):
+if "num_rows" not in st.session_state:
+    st.session_state.num_rows = 3
+
+col_add, col_remove = st.columns([1,1])
+with col_add:
+    if st.button("➕ Add Another Country"):
+        st.session_state.num_rows += 1
+with col_remove:
+    if st.session_state.num_rows > 1 and st.button("➖ Remove Last Country"):
+        st.session_state.num_rows -= 1
+
+for i in range(1, st.session_state.num_rows + 1):
     col1, col2 = st.columns([2,1])
     with col1:
         country = st.selectbox(f"Destination Country {i}", [""] + list(country_options), key=f"country{i}")
@@ -59,18 +69,17 @@ for i in range(1, 4):
         countries.append(country)
         traveler_counts.append(travelers)
 
-
+# -------------------------
+# Results Section
+# -------------------------
 if countries:
-    # -------------------------
-    # Calculations
-    # -------------------------
     results = []
     for country, travelers in zip(countries, traveler_counts):
         row = data[data["Country"].str.contains(country, case=False, na=False)]
         if not row.empty:
             case_data, total_cases = {}, 0
             for col in case_columns:
-                prob = row.iloc[0][col]  # Excel already decimal
+                prob = row.iloc[0][col]
                 estimated = travelers * prob
                 case_data[col.replace(" Case Probability", "")] = estimated
                 total_cases += estimated
@@ -136,7 +145,7 @@ if countries:
             """)
 
         # -------------------------
-        # PDF Output
+        # PDF Generation
         # -------------------------
         def create_pdf(dataframe, total_cases, case_totals):
             buffer = BytesIO()
@@ -161,7 +170,6 @@ if countries:
             c.drawString(30, 660, f"Countries Analyzed: {', '.join(dataframe['Country'])}")
 
             # Charts
-            # Country Bar Chart
             plt.figure(figsize=(5,3))
             plt.bar(dataframe["Country"], dataframe["Total Cases"], color="#2f4696")
             plt.title("Estimated Cases by Country")
@@ -171,7 +179,6 @@ if countries:
             bar_buf.seek(0)
             c.drawImage(ImageReader(bar_buf), 50, 400, width=500, height=200)
 
-            # Pie Chart
             plt.figure(figsize=(5,3))
             plt.pie(case_totals["Estimated Cases"], labels=case_totals["Case Type"], autopct="%.1f%%",
                     colors=brand_colors[:len(case_totals)])
@@ -185,7 +192,7 @@ if countries:
 
             # Glossaries
             c.setFont("Helvetica-Bold", 16)
-            c.setFillColorRGB(47/255,70/255,150/255)  # Medical color
+            c.setFillColorRGB(47/255,70/255,150/255)
             c.drawString(30, 770, "Medical Sub-Risks Glossary")
             c.setFillColorRGB(0,0,0)
             c.setFont("Helvetica", 12)
@@ -195,7 +202,7 @@ if countries:
             c.drawString(30, 695, "Limited: Specialist care limited; evacuations may be required")
             c.drawString(30, 680, "Poor: Basic care lacking; serious conditions require evacuation")
 
-            c.setFillColorRGB(0/255,147/255,84/255)  # Security color
+            c.setFillColorRGB(0/255,147/255,84/255)
             c.setFont("Helvetica-Bold", 16)
             c.drawString(300, 770, "Travel Security Sub-Risks Glossary")
             c.setFillColorRGB(0,0,0)
@@ -213,10 +220,10 @@ if countries:
                 c.drawString(300, y, item)
                 y -= 20
 
-            # Disclaimer
+            # Footer
             c.setFont("Helvetica-Oblique", 9)
             c.drawString(30, 40, "This report is for educational purposes only. Actual assistance cases may vary.")
-            c.drawString(30, 30, "Source: International SOS data.")
+            c.drawString(30, 30, "© 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.")
 
             c.save()
             buffer.seek(0)
@@ -225,10 +232,8 @@ if countries:
         pdf_buffer = create_pdf(results_df, total_cases, case_totals)
         st.download_button("📄 Download the PDF Report", data=pdf_buffer,
                            file_name="travel_risk_report.pdf", mime="application/pdf",
-                           use_container_width=True,
-                           key="pdf_download")
+                           use_container_width=True, key="pdf_download")
 
-        # Custom styling for download button
         st.markdown("""
         <style>
         div[data-testid="stDownloadButton"] button {
@@ -245,17 +250,25 @@ if countries:
 st.markdown(f"""
 <div style="background-color:#232762; padding:40px; text-align:center;">
     <h2 style="color:white;">How we can support</h2>
-    <p style="color:white; font-size:16px; max-width:700px; margin:auto;">
+    <p style="color:white; font-size:16px; max-width:700px; margin:auto; margin-bottom:20px;">
     Protecting your people from health and security threats. 
     Our comprehensive Travel Risk Management program supports both managers and employees by proactively 
     identifying, alerting, and managing medical, security, mental wellbeing, and logistical risks.
     </p>
-    <a href="https://www.internationalsos.com/get-in-touch?utm_source=riskreport" 
-       target="_blank">
+    <a href="https://www.internationalsos.com/get-in-touch?utm_source=riskreport" target="_blank">
        <button style="background-color:#EF820F; color:white; font-weight:bold; 
-                      border:none; padding:15px 30px; font-size:16px; cursor:pointer;">
+                      border:none; padding:15px 30px; font-size:16px; cursor:pointer; margin-top:15px;">
             Get in Touch
        </button>
     </a>
+</div>
+""", unsafe_allow_html=True)
+
+# -------------------------
+# Footer
+# -------------------------
+st.markdown("""
+<div style="text-align:center; font-size:12px; color:gray; margin-top:20px;">
+© 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.
 </div>
 """, unsafe_allow_html=True)
