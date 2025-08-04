@@ -39,6 +39,15 @@ st.markdown(f"""
 st.write("")
 
 # -------------------------
+# Intro Section
+# -------------------------
+st.markdown("""
+### Welcome to the International SOS Travel Risk Simulation Tool
+This tool provides a simulation of potential medical and security assistance cases based on your traveler volumes.
+It uses International SOS proprietary data collected from millions of cases globally.
+""")
+
+# -------------------------
 # Input Section
 # -------------------------
 st.markdown("## Step 1: Enter Traveler Data")
@@ -118,7 +127,37 @@ if countries:
         st.plotly_chart(fig2, use_container_width=True)
 
         # -------------------------
-        # Glossary Sections
+        # Recommendations Section
+        # -------------------------
+        st.markdown("## What These Results Mean for You")
+        st.write("""
+Based on your traveler volumes and chosen destinations, you could face a range of medical and security incidents.  
+
+International SOS can help you:
+- **Monitor global risks in real time** with our Risk Information Services and **Quantum** digital platform.  
+- **Support travelers 24/7** with immediate access to doctors, security experts, and interpreters.  
+- **Plan for medical and security evacuations**, ensuring employees can be moved quickly and safely if needed.  
+- **Fulfill your Duty of Care** by aligning with global standards like ISO 31030.  
+        """)
+
+        # -------------------------
+        # Risk Outlook Section
+        # -------------------------
+        st.markdown("## Explore the Risk Outlook 2025 Report")
+        col_img, col_txt = st.columns([1,2])
+        with col_img:
+            st.image("https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7")
+        with col_txt:
+            st.markdown("""
+The **Risk Outlook 2025** is our flagship annual study, providing actionable insights into the key medical and security 
+challenges facing organizations worldwide. Developed with expert analysis and global data, it helps leaders prepare 
+for the unexpected and safeguard their workforce.
+
+👉 [Access the Risk Outlook 2025 Report](https://www.internationalsos.com/risk-outlook?utm_source=riskreport)
+            """)
+
+        # -------------------------
+        # Glossaries
         # -------------------------
         st.markdown("## Glossaries")
         col1, col2 = st.columns(2)
@@ -160,10 +199,10 @@ if countries:
             c.setFont("Helvetica-Bold", 16)
             c.drawString(150, 770, "Assistance and Travel Risks Simulation Report")
 
-            # Summary
+            # Executive Summary
             c.setFillColorRGB(0,0,0)
             c.setFont("Helvetica-Bold", 14)
-            c.drawString(30, 720, "Summary")
+            c.drawString(30, 720, "Executive Summary")
             c.setFont("Helvetica", 12)
             c.drawString(30, 700, f"Total Travelers: {int(dataframe['Travelers'].sum())}")
             c.drawString(30, 680, f"Total Estimated Cases: {total_cases:.2f}")
@@ -190,24 +229,33 @@ if countries:
 
             c.showPage()
 
+            # CTA before Glossaries
+            c.setFont("Helvetica-Bold", 14)
+            c.drawString(30, 770, "Next Steps")
+            c.setFont("Helvetica", 12)
+            c.drawString(30, 740, "For a full Travel Risk Management consultation tailored to your organization, visit:")
+            c.setFillColorRGB(0/255, 99/255, 178/255)
+            c.drawString(30, 720, "https://www.internationalsos.com/get-in-touch?utm_source=riskreport")
+            c.setFillColorRGB(0,0,0)
+
             # Glossaries
             c.setFont("Helvetica-Bold", 16)
             c.setFillColorRGB(47/255,70/255,150/255)
-            c.drawString(30, 770, "Medical Sub-Risks Glossary")
+            c.drawString(30, 680, "Medical Sub-Risks Glossary")
             c.setFillColorRGB(0,0,0)
             c.setFont("Helvetica", 12)
-            c.drawString(30, 740, "Excellent: International standard")
-            c.drawString(30, 725, "Good: High standard in major cities")
-            c.drawString(30, 710, "Variable: Quality varies by location")
-            c.drawString(30, 695, "Limited: Specialist care limited; evacuations may be required")
-            c.drawString(30, 680, "Poor: Basic care lacking; serious conditions require evacuation")
+            c.drawString(30, 660, "Excellent: International standard")
+            c.drawString(30, 645, "Good: High standard in major cities")
+            c.drawString(30, 630, "Variable: Quality varies by location")
+            c.drawString(30, 615, "Limited: Specialist care limited; evacuations may be required")
+            c.drawString(30, 600, "Poor: Basic care lacking; serious conditions require evacuation")
 
             c.setFillColorRGB(0/255,147/255,84/255)
             c.setFont("Helvetica-Bold", 16)
-            c.drawString(300, 770, "Travel Security Sub-Risks Glossary")
+            c.drawString(300, 680, "Travel Security Sub-Risks Glossary")
             c.setFillColorRGB(0,0,0)
             c.setFont("Helvetica", 12)
-            y = 740
+            y = 660
             glossary_items = [
                 "Protests: May be disruptive or violent",
                 "Crime: Occurs in many areas, sometimes violent",
