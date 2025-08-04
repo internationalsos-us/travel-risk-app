@@ -26,7 +26,8 @@ case_columns = [col for col in data.columns if "Probability" in col]
 st.set_page_config(page_title="International SOS | Assistance & Travel Risks", layout="wide")
 
 # -------------------------
-# Banner with Logo (Title Left on Desktop, Logo Above on Mobile)
+# -------------------------
+# Banner with Logo (Title Left Desktop, Logo Above Mobile)
 # -------------------------
 st.markdown(f"""
 <style>
@@ -59,24 +60,25 @@ st.markdown(f"""
         text-align: center;
     }}
     .banner-logo {{
-        order: 1;
+        order: 0; /* logo goes first */
         margin: 0 0 15px 0;
     }}
     .banner-title {{
-        order: 2;
+        order: 1; /* title comes second */
         font-size: 22px;
         text-align: center;
+        color: white; /* ensure text stays white */
     }}
 }}
 </style>
 
 <div class="banner-container">
-    <h1 class="banner-title">
-        Assistance and Travel Risks Simulation Report
-    </h1>
     <div class="banner-logo">
         <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png" alt="International SOS" style="height:60px; max-width:100%;">
     </div>
+    <h1 class="banner-title">
+        Assistance and Travel Risks Simulation Report
+    </h1>
 </div>
 """, unsafe_allow_html=True)
 
