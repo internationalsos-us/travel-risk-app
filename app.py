@@ -35,7 +35,7 @@ st.markdown(f"""
         Assistance and Travel Risks Simulation Report
     </h1>
     <div style="flex:0; min-width:200px; margin-top:10px;">
-        <img src="{logo_url}" alt="International SOS" style="height:60px; max-width:100%;">
+        <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png" alt="International SOS" style="height:60px; max-width:100%;">
     </div>
 </div>
 """, unsafe_allow_html=True)
