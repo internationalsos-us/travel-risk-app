@@ -120,7 +120,7 @@ for i in range(1, st.session_state.num_rows + 1):
     with col1:
         country = st.selectbox(f"Destination Country {i}", [""] + list(country_options), key=f"country{i}")
     with col2:
-        travelers = st.number_input(f"Trips for {country or f'Country {i}'}",
+        travelers = st.number_input(f"Travelers for {country or f'Country {i}'}",
                                     min_value=0, value=0, step=1, key=f"trav{i}")
     if country:
         countries.append(country)
@@ -131,7 +131,7 @@ for i in range(1, st.session_state.num_rows + 1):
 # -------------------------
 if countries:
     results = []
-    for country, trips in zip(countries, traveler_counts):
+    for country, travelers in zip(countries, traveler_counts):
         row = data[data["Country"].str.contains(country, case=False, na=False)]
         if not row.empty:
             case_data, total_cases = {}, 0
@@ -148,14 +148,14 @@ if countries:
     results_df = pd.DataFrame(results)
 
     if not results_df.empty:
-        total_trips = results_df["Travelers"].sum()
+        total_travelers = results_df["Travelers"].sum()
         total_cases = results_df["Total Cases"].sum()
 
         st.markdown("## Step 2: Estimated Assistance Needs")
 
         col1, col2 = st.columns([1,2])
         with col1:
-            st.metric("Total Travelers", f"{total_trips:,}")
+            st.metric("Total Travelers", f"{total_travelers:,}")
             st.metric("Total Estimated Cases", f"{total_cases:.2f}")
         with col2:
             fig = px.bar(results_df, x="Country", y="Total Cases", 
