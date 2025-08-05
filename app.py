@@ -96,7 +96,7 @@ It uses International SOS proprietary data collected from millions of cases glob
 # -------------------------
 # Input Section
 # -------------------------
-st.markdown("## Step 1: Enter Traveler Data")
+st.markdown("## Enter Traveler Data")
 st.write("Select countries and input traveler volumes. Add more countries if needed.")
 
 countries, traveler_counts = [], []
@@ -152,7 +152,7 @@ if countries:
         total_trips = results_df["Travelers"].sum()
         total_cases = results_df["Total Cases"].sum()
 
-        st.markdown("## Step 2: Estimated Assistance Needs")
+        st.markdown("## Estimated Assistance Needs")
 
         col1, col2 = st.columns([1,2])
         with col1:
