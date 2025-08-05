@@ -120,7 +120,7 @@ for i in range(1, st.session_state.num_rows + 1):
     with col1:
         country = st.selectbox(f"Destination Country {i}", [""] + list(country_options), key=f"country{i}")
     with col2:
-        travelers = st.number_input(f"Travelers for {country or f'Country {i}'}",
+        travelers = st.number_input(f"Trips for {country or f'Country {i}'}",
                                     min_value=0, value=0, step=1, key=f"trav{i}")
     if country:
         countries.append(country)
