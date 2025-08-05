@@ -59,14 +59,14 @@ st.markdown("""
         text-align: center;
     }
     .banner-logo {
-        order: 0; /* logo goes first */
+        order: 0;
         margin: 0 0 15px 0;
     }
     .banner-title {
-        order: 1; /* title comes second */
+        order: 1;
         font-size: 22px;
         text-align: center;
-        color: white !important; /* keep text white */
+        color: white !important;
     }
 }
 </style>
@@ -87,8 +87,8 @@ st.write("")
 # -------------------------
 # Intro Section
 # -------------------------
-st.markdown("""
-### Welcome to the International SOS Travel Risk Simulation Tool
+st.markdown('<h1 style="color:#232762;">Welcome to the International SOS Travel Risk Simulation Tool</h1>', unsafe_allow_html=True)
+st.write("""
 This tool provides a simulation of potential medical and security assistance cases based on your traveler volumes.
 It uses International SOS proprietary data collected from millions of cases globally.
 """)
@@ -96,7 +96,7 @@ It uses International SOS proprietary data collected from millions of cases glob
 # -------------------------
 # Input Section
 # -------------------------
-st.markdown("## Enter Traveler Data")
+st.markdown('<h2 style="color:#2f4696;">Step 1: Enter Traveler Data</h2>', unsafe_allow_html=True)
 st.write("Select countries and input traveler volumes. Add more countries if needed.")
 
 countries, traveler_counts = [], []
@@ -152,14 +152,15 @@ if countries:
         total_trips = results_df["Travelers"].sum()
         total_cases = results_df["Total Cases"].sum()
 
-        st.markdown("## Estimated Assistance Needs")
+        st.markdown('<h2 style="color:#2f4696;">Step 2: Estimated Assistance Needs</h2>', unsafe_allow_html=True)
 
         col1, col2 = st.columns([1,2])
         with col1:
             st.metric("Total Travelers", f"{total_trips:,}")
             st.metric("Total Estimated Cases", f"{total_cases:.2f}")
             st.info("""
-Probabilities are based on the likelihood of assistance cases **per traveler**.  
+Probabilities are based on the likelihood of assistance cases **per traveler**, 
+with values already converted into decimals (e.g., 0.74% = 0.0074).  
 """)
         with col2:
             fig = px.bar(results_df, x="Country", y="Total Cases", 
@@ -169,17 +170,27 @@ Probabilities are based on the likelihood of assistance cases **per traveler**.
                         color_discrete_sequence=["#2f4696", "#232762", "#4a69bd"])
             st.plotly_chart(fig, use_container_width=True)
 
-        case_totals = results_df.drop(columns=["Country", "Travelers", "Total Cases"]).sum().reset_index()
-        case_totals.columns = ["Case Type", "Estimated Cases"]
+        # Toggle between overall and by-country case breakdown
+        st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
+        view_option = st.radio("View case type breakdown by:", ["Overall", "By Country"], horizontal=True)
 
-        st.markdown("### Case Type Breakdown (Overall)")
-        brand_colors = ["#2f4696", "#009354", "#FFD744", "#DD2484", "#6988C0", "#6C206B", "#EF820F", "#D4002C", "#EEEFEF"]
+        if view_option == "Overall":
+            case_totals = results_df.drop(columns=["Country", "Travelers", "Total Cases"]).sum().reset_index()
+            case_totals.columns = ["Case Type", "Estimated Cases"]
+        else:
+            selected_country = st.selectbox("Select a country", results_df["Country"].unique())
+            case_totals = results_df[results_df["Country"] == selected_country].drop(
+                columns=["Country", "Travelers", "Total Cases"]).T.reset_index()
+            case_totals.columns = ["Case Type", "Estimated Cases"]
+            case_totals = case_totals[1:]  # remove header row
+
         fig2 = px.pie(case_totals, values="Estimated Cases", names="Case Type",
-                      color_discrete_sequence=brand_colors)
+                      color_discrete_sequence=["#2f4696", "#009354", "#FFD744", "#DD2484", "#6988C0", "#6C206B", "#EF820F", "#D4002C", "#EEEFEF"])
+        fig2.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
         st.plotly_chart(fig2, use_container_width=True)
 
         # Recommendations Section
-        st.markdown("## What These Results Mean for You")
+        st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
         st.write("""
 Based on your traveler volumes and chosen destinations, you could face a range of medical and security incidents.  
 
@@ -217,31 +228,6 @@ International SOS can help you:
     </div>
 </div>
 """, unsafe_allow_html=True)
-
-        # Glossaries
-        st.markdown("## Glossaries")
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown('<h3 style="color:#2f4696;">Medical Sub-Risks Glossary</h3>', unsafe_allow_html=True)
-            st.write("""
-- **Excellent**: International standard  
-- **Good**: High standard, especially in major cities  
-- **Variable**: Quality varies; lower outside major cities  
-- **Limited**: Specialist care limited; evacuations may be required  
-- **Poor**: Basic care lacking; serious conditions require evacuation  
-            """)
-
-        with col2:
-            st.markdown('<h3 style="color:#009354;">Travel Security Sub-Risks Glossary</h3>', unsafe_allow_html=True)
-            st.write("""
-- **Protests**: May be disruptive or violent  
-- **Crime**: Can occur in many areas, sometimes violent  
-- **Transport**: Few reliable or safe options in some areas  
-- **Terrorism/Conflict**: Can pose direct risks in certain regions  
-- **Natural Hazards**: Can cause significant disruption  
-- **Cultural Issues**: Non-compliance may result in legal or physical consequences  
-            """)
 
 # Bottom CTA Section
 st.markdown(f"""
