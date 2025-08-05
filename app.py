@@ -91,15 +91,15 @@ st.write("")
 # -------------------------
 st.markdown("""
 ### Welcome to the International SOS Travel Risk Simulation Tool
-This tool provides a simulation of potential medical and security assistance cases based on your traveler volumes.
+This tool provides a simulation of potential medical and security assistance cases based on your travel volumes.
 It uses International SOS proprietary data collected from millions of cases globally.
 """)
 
 # -------------------------
 # Input Section
 # -------------------------
-st.markdown("## Step 1: Enter Traveler Data")
-st.write("Select countries and input traveler volumes. Add more countries if needed.")
+st.markdown("## Step 1: Enter Trips Data")
+st.write("Select countries and input trips volumes. Add more countries if needed.")
 
 countries, traveler_counts = [], []
 country_options = sorted(data["Country"].dropna().unique())
