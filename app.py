@@ -159,8 +159,7 @@ if countries:
             st.metric("Total Travelers", f"{total_trips:,}")
             st.metric("Total Estimated Cases", f"{total_cases:.2f}")
             st.info("""
-Probabilities are based on the likelihood of assistance cases **per traveler**, 
-with values already converted into decimals (e.g., 0.74% = 0.0074).  
+Probabilities are based on the likelihood of assistance cases **per traveler**.  
 """)
         with col2:
             fig = px.bar(results_df, x="Country", y="Total Cases", 
