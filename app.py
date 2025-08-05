@@ -121,11 +121,11 @@ col_add, col_remove = st.columns([1,1])
 with col_add:
     if st.button("➕ Add Another Country"):
         st.session_state.num_rows += 1
-        st.experimental_rerun()
+        st.rerun()
 with col_remove:
     if st.session_state.num_rows > 1 and st.button("➖ Remove Last Country"):
         st.session_state.num_rows -= 1
-        st.experimental_rerun()
+        st.rerun()
 
 # -------------------------
 # Results Section
