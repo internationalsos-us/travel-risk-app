@@ -98,8 +98,12 @@ It uses International SOS proprietary data collected from millions of cases glob
 # -------------------------
 # Input Section
 # -------------------------
-st.markdown("## 1: Enter Travel Data")
-st.write("Select countries and input number of trips to each country. Add more countries if needed.")
+st.markdown("## Step 1: Enter Traveler Data")
+st.info("""
+Probabilities are based on the likelihood of assistance cases **per traveler**, 
+with values already converted into decimals (e.g., 0.74% = 0.0074).  
+""")
+st.write("Select countries and input traveler volumes. Add more countries if needed.")
 
 countries, traveler_counts = [], []
 country_options = sorted(data["Country"].dropna().unique())
