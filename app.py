@@ -26,9 +26,7 @@ case_columns = [col for col in data.columns if "Probability" in col]
 st.set_page_config(page_title="International SOS | Assistance & Travel Risks", layout="wide")
 
 # -------------------------
-# -------------------------
-# -------------------------
-# Banner with Logo (Title Left Desktop, Logo Above Mobile)
+# Banner with Logo
 # -------------------------
 st.markdown("""
 <style>
@@ -68,7 +66,7 @@ st.markdown("""
         order: 1; /* title comes second */
         font-size: 22px;
         text-align: center;
-        color: white !important; /* force white text */
+        color: white !important; /* keep text white */
     }
 }
 </style>
@@ -91,7 +89,7 @@ st.write("")
 # -------------------------
 st.markdown("""
 ### Welcome to the International SOS Travel Risk Simulation Tool
-This tool provides a simulation of potential medical and security assistance cases based on your travel volumes.
+This tool provides a simulation of potential medical and security assistance cases based on your traveler volumes.
 It uses International SOS proprietary data collected from millions of cases globally.
 """)
 
@@ -107,14 +105,6 @@ country_options = sorted(data["Country"].dropna().unique())
 if "num_rows" not in st.session_state:
     st.session_state.num_rows = 3
 
-col_add, col_remove = st.columns([1,1])
-with col_add:
-    if st.button("➕ Add Another Country"):
-        st.session_state.num_rows += 1
-with col_remove:
-    if st.session_state.num_rows > 1 and st.button("➖ Remove Last Country"):
-        st.session_state.num_rows -= 1
-
 for i in range(1, st.session_state.num_rows + 1):
     col1, col2 = st.columns([2,1])
     with col1:
@@ -125,6 +115,17 @@ for i in range(1, st.session_state.num_rows + 1):
     if country:
         countries.append(country)
         traveler_counts.append(travelers)
+
+# Place Add/Remove buttons under the last input field
+col_add, col_remove = st.columns([1,1])
+with col_add:
+    if st.button("➕ Add Another Country"):
+        st.session_state.num_rows += 1
+        st.experimental_rerun()
+with col_remove:
+    if st.session_state.num_rows > 1 and st.button("➖ Remove Last Country"):
+        st.session_state.num_rows -= 1
+        st.experimental_rerun()
 
 # -------------------------
 # Results Section
@@ -148,19 +149,19 @@ if countries:
     results_df = pd.DataFrame(results)
 
     if not results_df.empty:
-        total_travelers = results_df["Travelers"].sum()
+        total_trips = results_df["Travelers"].sum()
         total_cases = results_df["Total Cases"].sum()
 
-        st.markdown("## 2: Estimated Assistance Needs")
+        st.markdown("## Step 2: Estimated Assistance Needs")
 
         col1, col2 = st.columns([1,2])
         with col1:
             st.metric("Total Travelers", f"{total_trips:,}")
             st.metric("Total Estimated Cases", f"{total_cases:.2f}")
             st.info("""
-        Probabilities are based on the likelihood of assistance cases **per traveler**, 
-        with values already converted into decimals (e.g., 0.74% = 0.0074).  
-        """)
+Probabilities are based on the likelihood of assistance cases **per traveler**, 
+with values already converted into decimals (e.g., 0.74% = 0.0074).  
+""")
         with col2:
             fig = px.bar(results_df, x="Country", y="Total Cases", 
                         text=results_df["Total Cases"].round(2),
@@ -178,12 +179,10 @@ if countries:
                       color_discrete_sequence=brand_colors)
         st.plotly_chart(fig2, use_container_width=True)
 
-        # -------------------------
         # Recommendations Section
-        # -------------------------
         st.markdown("## What These Results Mean for You")
         st.write("""
-Based on your travel volumes and chosen destinations, you could face a range of medical and security incidents.  
+Based on your traveler volumes and chosen destinations, you could face a range of medical and security incidents.  
 
 International SOS can help you:
 - **Monitor global risks in real time** with our Risk Information Services and **Quantum** digital platform.  
@@ -192,9 +191,7 @@ International SOS can help you:
 - **Fulfill your Duty of Care** by aligning with global standards like ISO 31030.  
         """)
 
-        # -------------------------
         # Risk Outlook Section
-        # -------------------------
         st.markdown("""
 <div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
     <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
@@ -222,9 +219,7 @@ International SOS can help you:
 </div>
 """, unsafe_allow_html=True)
 
-        # -------------------------
         # Glossaries
-        # -------------------------
         st.markdown("## Glossaries")
         col1, col2 = st.columns(2)
 
@@ -249,124 +244,7 @@ International SOS can help you:
 - **Cultural Issues**: Non-compliance may result in legal or physical consequences  
             """)
 
-        # -------------------------
-        # PDF Generation
-        # -------------------------
-        def create_pdf(dataframe, total_cases, case_totals):
-            buffer = BytesIO()
-            c = canvas.Canvas(buffer, pagesize=letter)
-
-            # Banner with Logo
-            logo = ImageReader(requests.get(
-    "https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png",
-    stream=True
-).raw)
-            c.setFillColorRGB(35/255, 39/255, 98/255)
-            c.rect(0, 750, 612, 50, fill=True, stroke=False)
-            c.drawImage(logo, 30, 755, height=40, preserveAspectRatio=True, mask='auto')
-            c.setFillColorRGB(1,1,1)
-            c.setFont("Helvetica-Bold", 16)
-            c.drawString(150, 770, "Assistance and Travel Risks Simulation Report")
-
-            # Executive Summary
-            c.setFillColorRGB(0,0,0)
-            c.setFont("Helvetica-Bold", 14)
-            c.drawString(30, 720, "Executive Summary")
-            c.setFont("Helvetica", 12)
-            c.drawString(30, 700, f"Total Travelers: {int(dataframe['Travelers'].sum())}")
-            c.drawString(30, 680, f"Total Estimated Cases: {total_cases:.2f}")
-            c.drawString(30, 660, f"Countries Analyzed: {', '.join(dataframe['Country'])}")
-
-            # Charts
-            plt.figure(figsize=(5,3))
-            plt.bar(dataframe["Country"], dataframe["Total Cases"], color="#2f4696")
-            plt.title("Estimated Cases by Country")
-            plt.tight_layout()
-            bar_buf = BytesIO()
-            plt.savefig(bar_buf, format="png")
-            bar_buf.seek(0)
-            c.drawImage(ImageReader(bar_buf), 50, 400, width=500, height=200)
-
-            plt.figure(figsize=(5,3))
-            plt.pie(case_totals["Estimated Cases"], labels=case_totals["Case Type"], autopct="%.1f%%",
-                    colors=brand_colors[:len(case_totals)])
-            plt.title("Case Type Breakdown (Overall)")
-            pie_buf = BytesIO()
-            plt.savefig(pie_buf, format="png")
-            pie_buf.seek(0)
-            c.drawImage(ImageReader(pie_buf), 50, 150, width=500, height=200)
-
-            c.showPage()
-
-            # CTA before Glossaries
-            c.setFont("Helvetica-Bold", 14)
-            c.drawString(30, 770, "Next Steps")
-            c.setFont("Helvetica", 12)
-            c.drawString(30, 740, "For a full Travel Risk Management consultation tailored to your organization, visit:")
-            c.setFillColorRGB(0/255, 99/255, 178/255)
-            c.drawString(30, 720, "https://www.internationalsos.com/get-in-touch?utm_source=riskreport")
-            c.setFillColorRGB(0,0,0)
-
-            # Glossaries
-            c.setFont("Helvetica-Bold", 16)
-            c.setFillColorRGB(47/255,70/255,150/255)
-            c.drawString(30, 680, "Medical Sub-Risks Glossary")
-            c.setFillColorRGB(0,0,0)
-            c.setFont("Helvetica", 12)
-            c.drawString(30, 660, "Excellent: International standard")
-            c.drawString(30, 645, "Good: High standard in major cities")
-            c.drawString(30, 630, "Variable: Quality varies by location")
-            c.drawString(30, 615, "Limited: Specialist care limited; evacuations may be required")
-            c.drawString(30, 600, "Poor: Basic care lacking; serious conditions require evacuation")
-
-            c.setFillColorRGB(0/255,147/255,84/255)
-            c.setFont("Helvetica-Bold", 16)
-            c.drawString(300, 680, "Travel Security Sub-Risks Glossary")
-            c.setFillColorRGB(0,0,0)
-            c.setFont("Helvetica", 12)
-            y = 660
-            glossary_items = [
-                "Protests: May be disruptive or violent",
-                "Crime: Occurs in many areas, sometimes violent",
-                "Transport: Few reliable or safe options",
-                "Terrorism/Conflict: Direct risks possible",
-                "Natural Hazards: Can cause significant disruption",
-                "Cultural Issues: Non-compliance may result in consequences"
-            ]
-            for item in glossary_items:
-                c.drawString(300, y, item)
-                y -= 20
-
-            # Footer
-            c.setFont("Helvetica-Oblique", 9)
-            c.drawString(30, 40, "This report is for educational purposes only. Actual assistance cases may vary.")
-            c.drawString(30, 30, "© 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.")
-
-            c.save()
-            buffer.seek(0)
-            return buffer
-
-        pdf_buffer = create_pdf(results_df, total_cases, case_totals)
-        st.download_button("📄 Download the PDF Report", data=pdf_buffer,
-                           file_name="travel_risk_report.pdf", mime="application/pdf",
-                           key="pdf_download")
-
-        st.markdown("""
-        <style>
-        div[data-testid="stDownloadButton"] button {
-            background-color: #2f4696;
-            color: white;
-            font-weight: bold;
-            border-radius: 8px;
-            width: auto;
-            display: inline-block;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-# -------------------------
 # Bottom CTA Section
-# -------------------------
 st.markdown(f"""
 <div style="background-color:#232762; padding:40px; text-align:center;">
     <h2 style="color:white;">How we can support</h2>
@@ -385,9 +263,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# -------------------------
 # Footer
-# -------------------------
 st.markdown("""
 <div style="text-align:center; font-size:12px; color:gray; margin-top:20px;">
 © 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.
