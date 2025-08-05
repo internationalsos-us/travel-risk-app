@@ -155,8 +155,12 @@ if countries:
 
         col1, col2 = st.columns([1,2])
         with col1:
-            st.metric("Total Travelers", f"{total_travelers:,}")
+            st.metric("Total Travelers", f"{total_trips:,}")
             st.metric("Total Estimated Cases", f"{total_cases:.2f}")
+            st.info("""
+        Probabilities are based on the likelihood of assistance cases **per traveler**, 
+        with values already converted into decimals (e.g., 0.74% = 0.0074).  
+        """)
         with col2:
             fig = px.bar(results_df, x="Country", y="Total Cases", 
                         text=results_df["Total Cases"].round(2),
