@@ -131,7 +131,7 @@ for i in range(1, st.session_state.num_rows + 1):
 # -------------------------
 if countries:
     results = []
-    for country, travelers in zip(countries, traveler_counts):
+    for country, trips in zip(countries, traveler_counts):
         row = data[data["Country"].str.contains(country, case=False, na=False)]
         if not row.empty:
             case_data, total_cases = {}, 0
@@ -179,7 +179,7 @@ if countries:
         # -------------------------
         st.markdown("## What These Results Mean for You")
         st.write("""
-Based on your traveler volumes and chosen destinations, you could face a range of medical and security incidents.  
+Based on your travel volumes and chosen destinations, you could face a range of medical and security incidents.  
 
 International SOS can help you:
 - **Monitor global risks in real time** with our Risk Information Services and **Quantum** digital platform.  
