@@ -455,13 +455,9 @@ if countries and sum(trip_counts) > 0:
             - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international **guidelines** like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         else:
-            st.markdown("""
-            <div class="risk-alert-box">
-                <p class="risk-alert-title">
-                    <span class="alert-icon-circle">🚨</span> Higher Risk Alert: Your exposure is higher than the global average in the following areas:
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+            st.write(f"""
+            Your simulation of **{total_trips:,} {trip_word}** to **{countries_list_str}** has identified an estimated **{total_cases:.2f} {case_word}**. Here is a breakdown of your estimated case types, with a comparison to the global average.
+            """)
             st.write("")
             
             higher_risk_messages = []
@@ -485,15 +481,20 @@ if countries and sum(trip_counts) > 0:
                 higher_risk_messages = sorted_risks[:3]
 
             if higher_risk_messages:
-                # Prepare a DataFrame for the horizontal bar chart
+                st.markdown("""
+                <div class="risk-alert-box">
+                    <p class="risk-alert-title">
+                        <span class="alert-icon-circle">🚨</span> Higher Risk Alert: Your exposure is higher than the global average in the following areas:
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+                
                 chart_data = pd.DataFrame(higher_risk_messages)
                 chart_data['risk_multiple'] = chart_data['risk_multiple'].round(1)
                 
-                # Create base and excess risk columns for stacked bars
                 chart_data['risk_base'] = np.minimum(chart_data['risk_multiple'], 1.0)
                 chart_data['risk_excess'] = np.maximum(0, chart_data['risk_multiple'] - 1.0)
 
-                # Sort data for the chart
                 chart_data = chart_data.sort_values('risk_multiple', ascending=True)
 
                 fig = go.Figure()
@@ -521,14 +522,14 @@ if countries and sum(trip_counts) > 0:
                 fig.update_layout(
                     barmode='stack',
                     title='Your Higher Risk Areas vs. Global Average',
-                    title_x=0, # Left align title
+                    title_x=0, 
                     font_color="black",
                     xaxis_title=None,
                     yaxis_title=None,
                     plot_bgcolor='rgba(0,0,0,0)',
                     paper_bgcolor='rgba(0,0,0,0)',
                     xaxis=dict(showgrid=False, range=[0, chart_data['risk_multiple'].max() * 1.1]),
-                    yaxis=dict(showgrid=False, automargin=True, font=dict(weight='bold')),
+                    yaxis=dict(showgrid=False, automargin=True, font=dict(family='Arial, sans-serif', weight='bold')),
                     showlegend=False,
                     width=None,
                     height=300,
