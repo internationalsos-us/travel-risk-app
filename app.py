@@ -299,7 +299,7 @@ if countries and sum(trip_counts) > 0:
             trip_word = "trip" if total_trips <= 1 else "trips"
             st.metric(f"Total {trip_word}", f"{total_trips:,}")
             # Pluralization check for "cases"
-            case_word = "case" if total_cases < 2 else "cases"
+            case_word = "case" if total_cases < 2 and total_cases >= 0 else "cases"
             st.metric(f"Total Estimated {case_word}", f"{total_cases:.2f}")
             st.info("Probabilities are based on the likelihood of assistance cases **per trip**.")
         with col2:
@@ -318,7 +318,7 @@ if countries and sum(trip_counts) > 0:
         # -------------------------
         # Case Type Breakdown
         # -------------------------
-        col_controls_left, col_controls_right = st.columns(2)
+        col_controls_left, col_controls_middle, col_controls_right = st.columns(3)
         with col_controls_left:
             st.markdown('<h2 style="color:#2f4696;">Your Case Type Breakdown</h2>', unsafe_allow_html=True)
             filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
@@ -373,7 +373,7 @@ if countries and sum(trip_counts) > 0:
             case_totals_bench = case_totals_bench.dropna(subset=['Benchmark Cases'])
 
         # Pie Charts
-        col_user_chart, col_bench_chart = st.columns(2)
+        col_user_chart, col_middle_chart, col_bench_chart = st.columns(3)
         with col_user_chart:
             if filter_country == "All":
                 case_totals_user = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().reset_index()
@@ -399,7 +399,7 @@ if countries and sum(trip_counts) > 0:
             )
             fig_user.update_traces(textinfo="label+percent", textposition="outside",
                                    marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)))
-            fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
+            fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.3, x=0.5, xanchor="center"),
                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_user, use_container_width=True)
 
@@ -414,7 +414,7 @@ if countries and sum(trip_counts) > 0:
             )
             fig_bench.update_traces(textinfo="label+percent", textposition="outside",
                                     marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)))
-            fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
+            fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.3, x=0.5, xanchor="center"),
                                     margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_bench, use_container_width=True)
             
@@ -439,7 +439,7 @@ if countries and sum(trip_counts) > 0:
 
         # Prepare for pluralization and dynamic content
         trip_word = "trip" if total_trips <= 1 else "trips"
-        case_word = "case" if total_cases < 2 else "cases"
+        case_word = "case" if total_cases < 2 and total_cases >= 0 else "cases"
         countries_list_str = ', '.join(f'**{c}**' for c in countries)
 
         if total_cases < 1:
@@ -528,7 +528,7 @@ if countries and sum(trip_counts) > 0:
                     plot_bgcolor='rgba(0,0,0,0)',
                     paper_bgcolor='rgba(0,0,0,0)',
                     xaxis=dict(showgrid=False, range=[0, chart_data['risk_multiple'].max() * 1.1]),
-                    yaxis=dict(showgrid=False, automargin=True),
+                    yaxis=dict(showgrid=False, automargin=True, font=dict(weight='bold')),
                     showlegend=False,
                     width=None,
                     height=300,
