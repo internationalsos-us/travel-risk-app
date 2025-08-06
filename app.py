@@ -120,6 +120,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.write("")
+st.write("")
 
 # -------------------------
 # Intro Section
@@ -129,12 +130,15 @@ st.write("""
 This tool provides a simulation of potential medical and security assistance cases based on your **trip volumes**.
 It uses International SOS proprietary data collected from millions of cases globally.
 """)
+st.write("")
+st.write("")
 
 # -------------------------
 # Input Section
 # -------------------------
 st.markdown('<h2 style="color:#2f4696;">Step 1: Enter Trip Volumes</h2>', unsafe_allow_html=True)
 st.write("Select countries and input estimated annual trip volumes. Add more countries if needed.")
+st.write("")
 
 countries, trip_counts = [], []
 country_options = sorted(data["Country"].dropna().unique())
@@ -181,7 +185,7 @@ data["Region"] = data["Country"].map(region_mapping)
 # -------------------------
 # Results Section
 # -------------------------
-if countries and sum(trip_counts) > 0: # Check if countries are selected AND trips > 0
+if countries and sum(trip_counts) > 0:
     results = []
     for country, trips in zip(countries, trip_counts):
         row = data[data["Country"].str.contains(country, case=False, na=False)]
@@ -199,12 +203,13 @@ if countries and sum(trip_counts) > 0: # Check if countries are selected AND tri
 
     results_df = pd.DataFrame(results)
 
-    if not results_df.empty and results_df["Total Cases"].sum() > 0: # Ensure there are cases to display
+    if not results_df.empty and results_df["Total Cases"].sum() > 0:
         total_trips = results_df["Trips"].sum()
         total_cases = results_df["Total Cases"].sum()
 
         st.markdown('---')
         st.markdown('<h2 style="color:#2f4696;">Step 2: Estimated Assistance Needs</h2>', unsafe_allow_html=True)
+        st.write("")
 
         col1, col2 = st.columns([1,2])
         with col1:
@@ -216,20 +221,23 @@ if countries and sum(trip_counts) > 0: # Check if countries are selected AND tri
                          text=results_df["Total Cases"].round(2),
                          title="Estimated Cases by Country",
                          color_discrete_sequence=["#2f4696", "#232762", "#4a69bd"])
-            fig.update_layout(showlegend=False) # The `color` parameter with `color_discrete_sequence` creates a legend that isn't useful in this context, so we remove it.
+            fig.update_layout(showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
+
+        st.write("")
+        st.write("")
 
         # -------------------------
         # Case Type Breakdown
         # -------------------------
         st.markdown('---')
         st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
+        st.write("")
 
         col_user, col_bench = st.columns(2)
 
         # User Pie Chart
         with col_user:
-            # Fixing the dropdown height by moving it outside the fixed-dropdown div
             filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
             
             if filter_country == "All":
@@ -242,22 +250,21 @@ if countries and sum(trip_counts) > 0: # Check if countries are selected AND tri
                 country_data.columns = ["Case Type", "Estimated Cases"]
                 case_totals_user = country_data
             
-            # Reorder the DataFrame to match the color mapping for consistency
             case_totals_user['Case Type'] = case_totals_user['Case Type'].apply(lambda x: x.replace(' Case Probability', ''))
             case_totals_user = case_totals_user.set_index('Case Type').reindex(case_type_colors.keys()).reset_index()
             case_totals_user = case_totals_user.dropna(subset=['Estimated Cases'])
-
 
             fig_user = px.pie(
                 case_totals_user,
                 values="Estimated Cases",
                 names="Case Type",
                 color="Case Type",
-                color_discrete_map=case_type_colors, # The color map is now correctly applied
+                color_discrete_map=case_type_colors,
                 title="Your Estimated Case Breakdown"
             )
-            fig_user.update_traces(textinfo="percent+label")
-            fig_user.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
+            fig_user.update_traces(textinfo="label+percent", textposition="outside", marker=dict(line=dict(color='#000000', width=1)), pull=[0.05] * len(case_totals_user))
+            fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
+                                   margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_user, use_container_width=True)
 
         # Benchmark Pie Chart with Styled Toggle
@@ -265,31 +272,20 @@ if countries and sum(trip_counts) > 0: # Check if countries are selected AND tri
             if "benchmark_mode" not in st.session_state:
                 st.session_state.benchmark_mode = "Global Average"
 
-            # Use st.columns to place the buttons side-by-side
-            btn_col1, btn_col2 = st.columns([1,1])
-            
+            btn_col1, btn_col2 = st.columns(2)
             with btn_col1:
-                # Add CSS classes to buttons based on the session state
                 global_btn_class = "toggle-selected" if st.session_state.benchmark_mode == "Global Average" else "toggle-unselected"
                 if st.button("Global Average", key="global_btn", help="Click to view global average benchmark"):
                     st.session_state.benchmark_mode = "Global Average"
-                    st.rerun() # Use rerun to update the chart immediately
-            
+                    st.rerun()
             with btn_col2:
                 regional_btn_class = "toggle-selected" if st.session_state.benchmark_mode == "Regional Average" else "toggle-unselected"
                 if st.button("Regional Average", key="regional_btn", help="Click to view regional average benchmark"):
                     st.session_state.benchmark_mode = "Regional Average"
-                    st.rerun() # Use rerun to update the chart immediately
+                    st.rerun()
 
-            # Re-creating the buttons with the correct styling logic
-            st.markdown(f"""
-            <div class="toggle-bar">
-                <button class="toggle-btn {global_btn_class}" onclick="window.parent.postMessage('streamlit:rerun', '*')">Global Average</button>
-                <button class="toggle-btn {regional_btn_class}" onclick="window.parent.postMessage('streamlit:rerun', '*')">Regional Average</button>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # The logic to determine the benchmark data remains the same
+            st.write("") # Add some space below buttons
+
             if st.session_state.benchmark_mode == "Global Average":
                 case_totals_bench = data[case_columns].mean().reset_index()
                 case_totals_bench.columns = ["Case Type", "Benchmark Cases"]
@@ -297,10 +293,8 @@ if countries and sum(trip_counts) > 0: # Check if countries are selected AND tri
                 benchmark_title = "Global Average Case Breakdown"
             else:
                 available_regions = sorted(data["Region"].dropna().unique())
-                # Add a conditional check to ensure a region is available
                 if available_regions:
-                    # Let's find the primary region from the user's input, or default to the first available one
-                    primary_region = region_mapping.get(countries[0]) if countries else available_regions[0]
+                    primary_region = region_mapping.get(countries[0]) if countries and countries[0] in region_mapping else available_regions[0]
                     default_index = available_regions.index(primary_region) if primary_region in available_regions else 0
                     selected_region = st.selectbox("Select a region", available_regions, index=default_index, key="region_select")
                     region_avg = data[data["Region"] == selected_region][case_columns].mean()
@@ -313,7 +307,6 @@ if countries and sum(trip_counts) > 0: # Check if countries are selected AND tri
                     case_totals_bench = pd.DataFrame(columns=["Case Type", "Benchmark Cases"])
                     benchmark_title = "Regional Average Case Breakdown"
 
-            # Reorder the DataFrame to match the color mapping for consistency
             case_totals_bench['Case Type'] = case_totals_bench['Case Type'].apply(lambda x: x.replace(' Case Probability', ''))
             case_totals_bench = case_totals_bench.set_index('Case Type').reindex(case_type_colors.keys()).reset_index()
             case_totals_bench = case_totals_bench.dropna(subset=['Benchmark Cases'])
@@ -323,28 +316,53 @@ if countries and sum(trip_counts) > 0: # Check if countries are selected AND tri
                 values="Benchmark Cases",
                 names="Case Type",
                 color="Case Type",
-                color_discrete_map=case_type_colors, # Corrected the color map
+                color_discrete_map=case_type_colors,
                 title=benchmark_title
             )
-            fig_bench.update_traces(textinfo="percent+label")
-            fig_bench.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
+            fig_bench.update_traces(textinfo="label+percent", textposition="outside", marker=dict(line=dict(color='#000000', width=1)), pull=[0.05] * len(case_totals_bench))
+            fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
+                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_bench, use_container_width=True)
+
+        st.write("")
+        st.write("")
 
         # -------------------------
         # Risk Outlook section
         # -------------------------
         st.markdown('---')
         st.markdown('<h2 style="color:#2f4696;">Risk Outlook</h2>', unsafe_allow_html=True)
-        # Assuming you want to add some logic here to generate dynamic content
-        # For now, let's add some placeholder text
-        st.write("""
-        This section can be used to display dynamic risk information based on the selected countries.
-        For example, you could highlight the top medical and security risks for each country.
-        """)
-        
+        st.write("")
+        st.markdown(f"""
+        <div style="background-color: #EEEFEF; padding: 25px; border-radius: 10px;">
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B39e1a179-8472-466d-a19c-30b1448651c6%7D_Risk_Map_2024.png"
+                 alt="Risk Map" style="height:150px; width:auto; border-radius:10px;">
+            <div>
+                <h3 style="margin-top: 0; color:#2f4696;">Your International SOS Risk Report</h3>
+                <p style="margin-bottom: 0;">
+                To gain a full understanding of the risk exposure facing your organisation, our
+                analysts can provide a comprehensive report that covers:
+                </p>
+                <ul>
+                    <li>Medical and Security risk ratings for each of your destinations.</li>
+                    <li>The key risks your travelers may face on the ground.</li>
+                    <li>Expert recommendations to protect your people and fulfill your duty of care.</li>
+                </ul>
+            </div>
+        </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.write("")
+        st.write("")
+
+        # -------------------------
         # Recommendations Section
+        # -------------------------
         st.markdown('---')
         st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
+        st.write("")
         st.write("""
 Based on your trip volumes and chosen destinations, you could face a range of medical and security incidents.  
 International SOS can help you:
@@ -354,12 +372,13 @@ International SOS can help you:
 - **Fulfill your Duty of Care** by aligning with global standards like ISO 31030.  
         """)
 
-# The 'Get in Touch' section is now moved out of the `if countries:` block
-# so it always appears. This is a crucial fix for the logic.
+st.write("")
+st.markdown('---')
+st.write("")
+
 # -------------------------
 # Get in Touch Section
 # -------------------------
-st.markdown('---')
 st.markdown(f"""
 <div style="background-color:#232762; padding:40px; text-align:center;">
     <h2 style="color:white;">How we can support</h2>
@@ -378,6 +397,8 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+st.write("")
+st.write("")
 
 # Footer
 st.markdown("""
