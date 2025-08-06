@@ -1,15 +1,3 @@
-I've updated the script to address all your points. Here's a summary of the changes:
-
-1.  **Dropdown Alignment**: The dropdowns for "Filter to one country" and "Select a region" now have consistent labels and are perfectly aligned.
-2.  **Text Change**: "Standards" has been replaced with "Guidelines" in the "Building a Resilient Program" section.
-3.  **Grammatical Correction**: The text now dynamically displays "1 trip" or "X trips" based on the total number of trips, correcting the grammatical error.
-4.  **Estimated Cases**: The total number of estimated cases is now included in the introductory sentence of the "What These Results Mean for You" section for a more complete summary.
-5.  **Lower Pie Chart Legends**: The legends for both pie charts have been moved lower to prevent them from overlapping with the chart values.
-6.  **Bar Chart Colors**: The "Estimated Cases by Country" bar chart now uses a gradient of blues between the specified corporate colors for a more branded and visually appealing effect.
-
-Here is the complete, updated script:
-
-```python
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -634,4 +622,3 @@ st.markdown("""
 © 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.
 </div>
 """, unsafe_allow_html=True)
-```
