@@ -119,6 +119,24 @@ st.markdown("""
     margin: 20px 0;
     border-radius: 5px;
 }
+
+/* New CSS for the modern boxes */
+.risk-card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+.risk-card {
+    flex: 1 1 calc(50% - 20px); /* 2 items per row with 20px gap */
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    font-size: 16px;
+    min-width: 300px;
+}
 </style>
 
 <div class="banner-container">
@@ -397,25 +415,28 @@ if countries and sum(trip_counts) > 0:
                         if user_percentage > global_percentage:
                             risk_multiple = user_percentage / global_percentage
                             
-                            service_suggestion = case_type_services.get(case_type, "Our comprehensive solutions can help.")
-                            
-                            # Create a single markdown string with indention and red color
+                            # Create a single markdown string for the risk card
                             higher_risk_messages.append(
                                 f"""
-                            - **{case_type}** cases are <span style="color:#D4002C;">**{risk_multiple:.1f}x higher**</span> than the global average.
-                            """
+                                <div class="risk-card">
+                                    <p style="font-weight: bold; margin: 0;">{case_type} cases</p>
+                                    <p style="margin: 0;">are <span style="color:#D4002C;">**{risk_multiple:.1f}x higher**</span> than the global average.</p>
+                                </div>
+                                """
                             )
 
             if higher_risk_messages:
                 st.markdown("""
                 <div class="risk-alert-box">
-                <p style="font-weight: bold; color:#D4002C; font-size:18px; margin: 0;">
-                🚨 Higher Risk Alert: You have a higher exposure to the following risks:
-                </p>
+                    <p style="font-weight: bold; color:#D4002C; font-size:18px; margin: 0;">
+                    🚨 Higher Risk Alert: Your exposure is higher in the following areas:
+                    </p>
                 </div>
                 """, unsafe_allow_html=True)
+                st.markdown('<div class="risk-card-container">', unsafe_allow_html=True)
                 for msg in higher_risk_messages:
                     st.markdown(msg, unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
                 st.write("")
             else:
                 st.info("Your top case types are not disproportionately higher than the global average, but proactive management is still essential.")
