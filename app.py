@@ -176,7 +176,7 @@ h2, strong, b {
 }
 /* New CSS rule for the page body to create margins */
 div[data-testid="stAppViewBlockContainer"] {
-    width: 70%;
+    max-width: 70%;
     margin: auto;
 }
 </style>
@@ -514,8 +514,8 @@ if countries and sum(trip_counts) > 0:
                     font_color="black",
                     xaxis_title=None,
                     yaxis_title=None,
-                    plot_bgcolor=None,
-                    paper_bgcolor=None,
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
                     xaxis=dict(showgrid=False, range=[0, chart_data['risk_multiple'].max() * 1.1]),
                     yaxis=dict(showgrid=False, automargin=True),
                     showlegend=False,
