@@ -15,6 +15,22 @@ data = load_data()
 case_columns = [col for col in data.columns if "Probability" in col]
 
 # -------------------------
+# Color Mapping
+# -------------------------
+case_type_colors = {
+    "Medical Information & Analysis": "#2f4696",
+    "Medical Out-Patient": "#6988C0",
+    "Medical In-Patient": "#FFD744",
+    "Medical Evacs, Repats, & RMR": "#DD2484",
+    "Security Evacs, Repats, & RMR": "#6C206B",
+    "Security Information & Analysis": "#009354",
+    "Security Referral": "#EF820F",
+    "Security Interventional Assistance": "#D4002C",
+    "Security Evacuation": "#EEEFEF",
+    "Travel Information & Analysis": "#232762"
+}
+
+# -------------------------
 # Page Config
 # -------------------------
 st.set_page_config(page_title="International SOS | Assistance & Travel Risks", layout="wide")
@@ -62,6 +78,22 @@ st.markdown("""
         text-align: center;
         color: white !important;
     }
+}
+.toggle-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.toggle {
+    padding: 8px 18px;
+    border-radius: 25px;
+    background-color: #ccc;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+.toggle.active {
+    background-color: #2f4696;
 }
 </style>
 
@@ -122,10 +154,9 @@ with col_remove:
         st.rerun()
 
 # -------------------------
-# Region Mapping (World Bank)
+# Region Mapping (World Bank sample)
 # -------------------------
 region_mapping = {
-    # Subset for illustration; ideally, extend to all countries in your dataset
     "Afghanistan": "South Asia", "Azerbaijan": "Europe & Central Asia", "Bangladesh": "South Asia",
     "Benin": "Sub-Saharan Africa", "Brazil": "Latin America & Caribbean", "China": "East Asia & Pacific",
     "Egypt": "Middle East & North Africa", "France": "Europe & Central Asia",
@@ -179,60 +210,73 @@ with values already converted into decimals (e.g., 0.74% = 0.0074).
                         color_discrete_sequence=["#2f4696", "#232762", "#4a69bd"])
             st.plotly_chart(fig, use_container_width=True)
 
-        # Benchmarking Options
+        # -------------------------
+        # Case Type Breakdown Side-by-Side
+        # -------------------------
         st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
-        benchmark_option = st.radio(
-            "View case type breakdown by:",
-            ["My Selected Countries", "Global Average", "Regional Average"],
-            horizontal=True
-        )
 
-        # Global Average
-        global_avg = data[case_columns].mean()
+        # Apple-style toggles (HTML)
+        if "benchmark_mode" not in st.session_state:
+            st.session_state.benchmark_mode = "Global Average"
 
-        if benchmark_option == "My Selected Countries":
-            if len(countries) > 1:
-                case_totals = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().reset_index()
-                case_totals.columns = ["Case Type", "Estimated Cases"]
+        st.markdown(f"""
+        <div class="toggle-container">
+            <a class="toggle {'active' if st.session_state.benchmark_mode=='Global Average' else ''}" onclick="window.location.search='?mode=Global+Average'">Global Average</a>
+            <a class="toggle {'active' if st.session_state.benchmark_mode=='Regional Average' else ''}" onclick="window.location.search='?mode=Regional+Average'">Regional Average</a>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Manual sync with query params
+        query_params = st.query_params
+        if "mode" in query_params:
+            st.session_state.benchmark_mode = query_params["mode"]
+
+        # User pie chart (left)
+        col_user, col_bench = st.columns(2)
+
+        with col_user:
+            st.markdown("#### My Selected Countries")
+            filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
+            if filter_country == "All":
+                case_totals_user = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().reset_index()
+                case_totals_user.columns = ["Case Type", "Estimated Cases"]
             else:
-                selected_country = st.selectbox("Select a country", results_df["Country"].unique())
-                country_data = results_df[results_df["Country"] == selected_country].drop(
+                country_data = results_df[results_df["Country"] == filter_country].drop(
                     columns=["Country", "Trips", "Total Cases"]
                 ).T.reset_index()
                 country_data.columns = ["Case Type", "Estimated Cases"]
-                country_data["Estimated Cases"] = pd.to_numeric(country_data["Estimated Cases"], errors="coerce")
-                case_totals = country_data
+                case_totals_user = country_data
+            case_totals_user = case_totals_user.sort_values(by="Estimated Cases", ascending=False)
 
-        elif benchmark_option == "Global Average":
-            case_totals = global_avg.reset_index()
-            case_totals.columns = ["Case Type", "Estimated Cases"]
-            case_totals["Estimated Cases"] = case_totals["Estimated Cases"] * total_trips
+            fig_user = px.pie(case_totals_user, values="Estimated Cases", names="Case Type")
+            fig_user.update_traces(marker=dict(colors=[case_type_colors[c] for c in case_totals_user["Case Type"]]))
+            fig_user.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
+            st.plotly_chart(fig_user, use_container_width=True)
 
-        elif benchmark_option == "Regional Average":
-            available_regions = sorted(data["Region"].dropna().unique())
-            selected_region = st.selectbox("Select a region", available_regions)
-            region_avg = data[data["Region"] == selected_region][case_columns].mean()
-            case_totals = region_avg.reset_index()
-            case_totals.columns = ["Case Type", "Estimated Cases"]
-            case_totals["Estimated Cases"] = case_totals["Estimated Cases"] * total_trips
+        # Benchmark pie chart (right)
+        with col_bench:
+            if st.session_state.benchmark_mode == "Global Average":
+                st.markdown("#### Global Average")
+                global_avg = data[case_columns].mean()
+                case_totals_bench = global_avg.reset_index()
+                case_totals_bench.columns = ["Case Type", "Estimated Cases"]
+                case_totals_bench["Estimated Cases"] = case_totals_bench["Estimated Cases"] * total_trips
+            else:
+                st.markdown("#### Regional Average")
+                available_regions = sorted(data["Region"].dropna().unique())
+                selected_region = st.selectbox("Select a region", available_regions)
+                region_avg = data[data["Region"] == selected_region][case_columns].mean()
+                case_totals_bench = region_avg.reset_index()
+                case_totals_bench.columns = ["Case Type", "Estimated Cases"]
+                case_totals_bench["Estimated Cases"] = case_totals_bench["Estimated Cases"] * total_trips
 
-        # Sort Descending
-        case_totals = case_totals.sort_values(by="Estimated Cases", ascending=False)
+            case_totals_bench = case_totals_bench.sort_values(by="Estimated Cases", ascending=False)
+            fig_bench = px.pie(case_totals_bench, values="Estimated Cases", names="Case Type")
+            fig_bench.update_traces(marker=dict(colors=[case_type_colors[c] for c in case_totals_bench["Case Type"]]))
+            fig_bench.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
+            st.plotly_chart(fig_bench, use_container_width=True)
 
-        # Pie Chart
-        fig2 = px.pie(
-            case_totals,
-            values="Estimated Cases",
-            names="Case Type",
-            color_discrete_sequence=[
-                "#2f4696", "#009354", "#FFD744", "#DD2484",
-                "#6988C0", "#6C206B", "#EF820F", "#D4002C", "#EEEFEF"
-            ]
-        )
-        fig2.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
-        st.plotly_chart(fig2, use_container_width=True)
-
-        # Recommendations
+        # Recommendations Section
         st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
         st.write("""
 Based on your trip volumes and chosen destinations, you could face a range of medical and security incidents.  
@@ -243,53 +287,6 @@ International SOS can help you:
 - **Plan for medical and security evacuations**, ensuring employees can be moved quickly and safely if needed.  
 - **Fulfill your Duty of Care** by aligning with global standards like ISO 31030.  
         """)
-
-        # Risk Outlook Section
-        st.markdown("""
-<div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
-    <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
-    <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
-        <div style="flex:1; min-width:300px; text-align:center;">
-            <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
-                 alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
-        </div>
-        <div style="flex:1; min-width:300px;">
-            <p style="font-size:16px; line-height:1.6; color:#333;">
-                The <b>Risk Outlook 2025</b> is our flagship annual study, providing actionable insights into the key medical and security 
-                challenges facing organizations worldwide. Developed with expert analysis and global data, it helps leaders prepare 
-                for the unexpected and safeguard their workforce.
-            </p>
-            <p style="text-align:left; margin-top:20px;">
-                <a href="https://www.internationalsos.com/risk-outlook?utm_source=riskreport" target="_blank"
-                   style="background-color:white; color:#2f4696; font-weight:bold; 
-                          padding:12px 24px; text-decoration:none; border:2px solid #2f4696;
-                          border-radius:20px; display:inline-block;">
-                    📘 Access the Risk Outlook 2025 Report
-                </a>
-            </p>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# Bottom CTA Section
-st.markdown(f"""
-<div style="background-color:#232762; padding:40px; text-align:center;">
-    <h2 style="color:white;">How we can support</h2>
-    <p style="color:white; font-size:16px; max-width:700px; margin:auto; margin-bottom:20px;">
-    Protecting your people from health and security threats. 
-    Our comprehensive Travel Risk Management program supports both managers and employees by proactively 
-    identifying, alerting, and managing medical, security, mental wellbeing, and logistical risks.
-    </p>
-    <a href="https://www.internationalsos.com/get-in-touch?utm_source=riskreport" target="_blank">
-       <button style="background-color:#EF820F; color:white; font-weight:bold; 
-                      border:none; padding:15px 30px; font-size:16px; cursor:pointer; 
-                      margin-top:15px; border-radius:20px;">
-            Get in Touch
-       </button>
-    </a>
-</div>
-""", unsafe_allow_html=True)
 
 # Footer
 st.markdown("""
