@@ -221,9 +221,12 @@ if countries and sum(trip_counts) > 0:
         # Case Type Breakdown
         # -------------------------
         st.markdown('---')
-        st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
-        st.write("")
-        st.write("")
+        col_title_left, col_title_right = st.columns(2)
+        with col_title_left:
+            st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
+        with col_title_right:
+            st.markdown('<h2 style="color:#2f4696;">Benchmark against:</h2>', unsafe_allow_html=True)
+        st.write("") # Add space after titles
 
         col_user, col_bench = st.columns(2)
 
@@ -261,22 +264,16 @@ if countries and sum(trip_counts) > 0:
 
         # Benchmark Pie Chart with Styled Toggle
         with col_bench:
-            st.markdown('**Benchmark against:**')
             if "benchmark_mode" not in st.session_state:
                 st.session_state.benchmark_mode = "Global Average"
             
             col_btn1, col_btn2 = st.columns(2)
             
-            # Use buttons to set the state
             if col_btn1.button("Global Average", key="global_btn_click", use_container_width=True):
                 st.session_state.benchmark_mode = "Global Average"
             if col_btn2.button("Regional Average", key="regional_btn_click", use_container_width=True):
                 st.session_state.benchmark_mode = "Regional Average"
 
-            # Apply CSS styling based on the current mode
-            global_class = 'toggle-selected' if st.session_state.benchmark_mode == 'Global Average' else 'toggle-unselected'
-            regional_class = 'toggle-selected' if st.session_state.benchmark_mode == 'Regional Average' else 'toggle-unselected'
-            
             st.markdown(f"""
             <style>
                 div[data-testid="stColumn"]:nth-child(2) > div > button[data-testid="base-button-secondary"]:nth-child(1) {{
