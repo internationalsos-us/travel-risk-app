@@ -526,7 +526,6 @@ if countries and sum(trip_counts) > 0:
                     barmode='stack',
                     title='Your Higher Risk Areas vs. Global Average',
                     title_x=0, # Left align title
-                    font_color="black",
                     xaxis_title=None,
                     yaxis_title=None,
                     plot_bgcolor='rgba(0,0,0,0)',
