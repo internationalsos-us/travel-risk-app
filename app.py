@@ -79,12 +79,17 @@ st.markdown("""
         color: white !important;
     }
 }
+.toggle-bar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
 .toggle-btn {
     padding: 6px 14px;
     border-radius: 20px;
     border: none;
     cursor: pointer;
-    margin-right: 8px;
+    margin: 0 5px;
     font-weight: bold;
 }
 .toggle-selected {
@@ -154,7 +159,7 @@ with col_remove:
         st.rerun()
 
 # -------------------------
-# Region Mapping (World Bank sample)
+# Region Mapping
 # -------------------------
 region_mapping = {
     "Afghanistan": "South Asia", "Azerbaijan": "Europe & Central Asia", "Bangladesh": "South Asia",
@@ -198,10 +203,7 @@ if countries:
         with col1:
             st.metric("Total Trips", f"{total_trips:,}")
             st.metric("Total Estimated Cases", f"{total_cases:.2f}")
-            st.info("""
-Probabilities are based on the likelihood of assistance cases **per trip**, 
-with values already converted into decimals (e.g., 0.74% = 0.0074).  
-""")
+            st.info("Probabilities are based on the likelihood of assistance cases **per trip**.")
         with col2:
             fig = px.bar(results_df, x="Country", y="Total Cases", 
                         text=results_df["Total Cases"].round(2),
@@ -211,13 +213,13 @@ with values already converted into decimals (e.g., 0.74% = 0.0074).
             st.plotly_chart(fig, use_container_width=True)
 
         # -------------------------
-        # Case Type Breakdown Side-by-Side
+        # Case Type Breakdown
         # -------------------------
         st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
 
         col_user, col_bench = st.columns(2)
 
-        # Left-hand User Pie Chart
+        # User Pie Chart
         with col_user:
             st.markdown("#### My Selected Countries")
             filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
@@ -243,11 +245,12 @@ with values already converted into decimals (e.g., 0.74% = 0.0074).
             fig_user.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
             st.plotly_chart(fig_user, use_container_width=True)
 
-        # Right-hand Benchmark Pie Chart
+        # Benchmark Pie Chart with Toggle Buttons
         with col_bench:
             if "benchmark_mode" not in st.session_state:
                 st.session_state.benchmark_mode = "Global Average"
 
+            st.markdown('<div class="toggle-bar">', unsafe_allow_html=True)
             col_btn1, col_btn2 = st.columns([1,1])
             with col_btn1:
                 if st.button("Global Average", key="global_btn"):
@@ -255,15 +258,14 @@ with values already converted into decimals (e.g., 0.74% = 0.0074).
             with col_btn2:
                 if st.button("Regional Average", key="regional_btn"):
                     st.session_state.benchmark_mode = "Regional Average"
+            st.markdown('</div>', unsafe_allow_html=True)
 
             if st.session_state.benchmark_mode == "Global Average":
-                st.markdown("#### Global Average")
                 global_avg = data[case_columns].mean()
                 case_totals_bench = global_avg.reset_index()
                 case_totals_bench.columns = ["Case Type", "Estimated Cases"]
                 case_totals_bench["Estimated Cases"] = case_totals_bench["Estimated Cases"] * total_trips
             else:
-                st.markdown("#### Regional Average")
                 available_regions = sorted(data["Region"].dropna().unique())
                 selected_region = st.selectbox("Select a region", available_regions, key="region_select")
                 region_avg = data[data["Region"] == selected_region][case_columns].mean()
