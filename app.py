@@ -79,6 +79,25 @@ st.markdown("""
         color: white !important;
     }
 }
+.toggle-bar {
+    margin-bottom: 15px;
+}
+.toggle-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    margin-right: 8px;
+    font-weight: bold;
+}
+.toggle-selected {
+    background-color: #2f4696;
+    color: white;
+}
+.toggle-unselected {
+    background-color: #cccccc;
+    color: black;
+}
 </style>
 
 <div class="banner-container">
@@ -126,7 +145,7 @@ for i in range(1, st.session_state.num_rows + 1):
         countries.append(country)
         trip_counts.append(trips)
 
-# Add/Remove buttons under the last input field
+# Add/Remove buttons
 col_add, col_remove = st.columns([1,1])
 with col_add:
     if st.button("➕ Add Another Country"):
@@ -202,12 +221,21 @@ with values already converted into decimals (e.g., 0.74% = 0.0074).
         if "benchmark_mode" not in st.session_state:
             st.session_state.benchmark_mode = "Global Average"
 
-        col_toggle1, col_toggle2 = st.columns(2)
+        # Toggle buttons above left chart
+        col_toggle1, col_toggle2 = st.columns([1,1])
         with col_toggle1:
-            if st.button("🌐 Global Average", use_container_width=True):
+            if st.button(
+                "Global Average",
+                key="global_btn",
+                help="Compare against the global average",
+            ):
                 st.session_state.benchmark_mode = "Global Average"
         with col_toggle2:
-            if st.button("🌍 Regional Average", use_container_width=True):
+            if st.button(
+                "Regional Average",
+                key="regional_btn",
+                help="Compare against a regional average",
+            ):
                 st.session_state.benchmark_mode = "Regional Average"
 
         col_user, col_bench = st.columns(2)
@@ -269,6 +297,27 @@ International SOS can help you:
 - **Plan for medical and security evacuations**, ensuring employees can be moved quickly and safely if needed.  
 - **Fulfill your Duty of Care** by aligning with global standards like ISO 31030.  
         """)
+
+        # -------------------------
+        # Get in Touch Section
+        # -------------------------
+        st.markdown(f"""
+        <div style="background-color:#232762; padding:40px; text-align:center;">
+            <h2 style="color:white;">How we can support</h2>
+            <p style="color:white; font-size:16px; max-width:700px; margin:auto; margin-bottom:20px;">
+            Protecting your people from health and security threats. 
+            Our comprehensive Travel Risk Management program supports both managers and employees by proactively 
+            identifying, alerting, and managing medical, security, mental wellbeing, and logistical risks.
+            </p>
+            <a href="https://www.internationalsos.com/get-in-touch?utm_source=riskreport" target="_blank">
+               <button style="background-color:#EF820F; color:white; font-weight:bold; 
+                              border:none; padding:15px 30px; font-size:16px; cursor:pointer; 
+                              margin-top:15px; border-radius:20px;">
+                    Get in Touch
+               </button>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Footer
 st.markdown("""
