@@ -34,16 +34,16 @@ case_type_colors = {
 # Mapping of Case Types to Services
 # -------------------------
 case_type_services = {
-    "Medical Information & Analysis": "**Quantum** digital platform for proactive risk intelligence and **Medical Consulting** for expert advice.",
-    "Medical Out-Patient": "**Medical Consulting** and our extensive **Provider Network** for immediate access to care.",
-    "Medical In-Patient": "Our **TeleConsultation** services, combined with expert **in-patient case management**.",
-    "Medical Evacs, Repats, & RMR": "Dedicated **Medical Evacuation** and **Repatriation** teams with full **Case Management**.",
-    "Security Evacs, Repats, & RMR": "Specialized **Security Evacuation** and **Repatriation** with our **Security Consulting**.",
-    "Security Information & Analysis": "**Quantum** for real-time threat intelligence and expert **Security Consulting**.",
-    "Security Referral": "Our global **Provider Network** and **Security Consulting** for reliable local support.",
-    "Security Interventional Assistance": "Immediate on-the-ground support with **Security Consulting** and **On-the-Ground Response**.",
-    "Security Evacuation": "Critical **Security Evacuation** and **Repatriation** services to ensure safe transport.",
-    "Travel Information & Analysis": "**Quantum** and our **Risk Ratings** to help you stay ahead of potential travel disruptions."
+    "Medical Information & Analysis": "Quantum digital platform for proactive risk intelligence and Medical Consulting for expert advice.",
+    "Medical Out-Patient": "Medical Consulting and our extensive Provider Network for immediate access to care.",
+    "Medical In-Patient": "Our TeleConsultation services, combined with expert in-patient case management.",
+    "Medical Evacs, Repats, & RMR": "Dedicated Medical Evacuation and Repatriation teams with full Case Management.",
+    "Security Evacs, Repats, & RMR": "Specialized Security Evacuation and Repatriation with our Security Consulting.",
+    "Security Information & Analysis": "Quantum for real-time threat intelligence and expert Security Consulting.",
+    "Security Referral": "Our global Provider Network and Security Consulting for reliable local support.",
+    "Security Interventional Assistance": "Immediate on-the-ground support with Security Consulting and On-the-Ground Response.",
+    "Security Evacuation": "Critical Security Evacuation and Repatriation services to ensure safe transport.",
+    "Travel Information & Analysis": "Quantum and our Risk Ratings to help you stay ahead of potential travel disruptions."
 }
 
 # -------------------------
@@ -149,7 +149,7 @@ st.write("")
 # -------------------------
 # Input Section
 # -------------------------
-st.markdown('<h2 style="color:#2f4696;">Step 1: Enter Trip Volumes</h2>', unsafe_allow_html=True)
+st.markdown('<h2 style="color:#2f4696;">Enter Trip Volumes</h2>', unsafe_allow_html=True)
 st.write("Select countries and input estimated annual trip volumes. Add more countries if needed.")
 st.write("")
 
@@ -221,7 +221,7 @@ if countries and sum(trip_counts) > 0:
         total_cases = results_df["Total Cases"].sum()
 
         st.markdown('---')
-        st.markdown('<h2 style="color:#2f4696;">Step 2: Estimated Assistance Needs</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 style="color:#2f4696;">Your Estimated Assistance Needs</h2>', unsafe_allow_html=True)
         st.write("")
 
         col1, col2 = st.columns([1,2])
@@ -246,7 +246,7 @@ if countries and sum(trip_counts) > 0:
         st.markdown('---')
         col_controls_left, col_controls_right = st.columns(2)
         with col_controls_left:
-            st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
+            st.markdown('<h2 style="color:#2f4696;">Your Case Type Breakdown</h2>', unsafe_allow_html=True)
             filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
         with col_controls_right:
             st.markdown('**Benchmark against:**', unsafe_allow_html=True)
@@ -364,7 +364,6 @@ if countries and sum(trip_counts) > 0:
 
         countries_list_str = ', '.join(f'**{c}**' for c in countries)
 
-        # Dynamic intro based on risk level (less than 1 total case)
         if total_cases < 1:
             st.write(f"""
             Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
@@ -378,16 +377,13 @@ if countries and sum(trip_counts) > 0:
             - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         else:
-            # Dynamic intro and detailed risk comparison for all cases with higher risk
             st.write(f"""
             Your simulation of **{total_trips:,} trips** to **{countries_list_str}** has identified several key risks. Here is a breakdown of your estimated case types, with a comparison to the global average.
             """)
             st.write("")
             
-            # Build the list of higher-risk case types
             higher_risk_messages = []
             
-            # Calculate total cases for both user and global to get percentages
             user_total_cases = user_case_totals_df['Estimated Cases'].sum()
             global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
             
@@ -401,15 +397,15 @@ if countries and sum(trip_counts) > 0:
                         if user_percentage > global_percentage:
                             risk_multiple = user_percentage / global_percentage
                             
-                            # Get the suggested service for the case type
                             service_suggestion = case_type_services.get(case_type, "Our comprehensive solutions can help.")
                             
-                            # Build the markdown string
+                            # Create a single markdown string with indention and red color
                             higher_risk_messages.append(
-                                f"<p style='margin-bottom: 5px;'>➡️ Your exposure to **{case_type}** cases is **{risk_multiple:.1f}x higher** than the global average. </p>"
-                                f"<p style='font-size: 14px; margin-left: 20px;'>💡 **Solution:** {service_suggestion}</p>"
+                                f"""
+                            - **{case_type}** cases are <span style="color:#D4002C;">**{risk_multiple:.1f}x higher**</span> than the global average.
+                            """
                             )
-            
+
             if higher_risk_messages:
                 st.markdown("""
                 <div class="risk-alert-box">
@@ -424,7 +420,6 @@ if countries and sum(trip_counts) > 0:
             else:
                 st.info("Your top case types are not disproportionately higher than the global average, but proactive management is still essential.")
             
-            # The general recommendations section remains the same
             st.markdown("""
             Based on these insights, International SOS can help you:
             - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
