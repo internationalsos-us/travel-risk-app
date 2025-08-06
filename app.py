@@ -333,11 +333,19 @@ if countries and sum(trip_counts) > 0:
 
         # Calculate global benchmark for comparison
         global_avg_prob = data[case_columns].mean()
-        global_benchmark_cases = (global_avg_prob * total_trips).sum()
+        global_benchmark_cases_df = (global_avg_prob * total_trips).to_frame(name="Benchmark Cases")
+        global_benchmark_cases_df.index = global_benchmark_cases_df.index.str.replace(" Case Probability", "")
+        global_benchmark_cases_df = global_benchmark_cases_df.sort_values(by="Benchmark Cases", ascending=False)
+        
+        # Get top 3 cases for the user's simulation
+        user_case_totals_df = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().to_frame(name="Estimated Cases")
+        user_case_totals_df.index = user_case_totals_df.index.str.replace(" Case Probability", "")
+        user_case_totals_df = user_case_totals_df.sort_values(by="Estimated Cases", ascending=False)
+        user_top_3_cases = user_case_totals_df.head(3)
 
         countries_list_str = ', '.join(f'**{c}**' for c in countries)
 
-        # Dynamic intro based on risk level
+        # Dynamic intro based on risk level (less than 1 total case)
         if total_cases < 1:
             st.write(f"""
             Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
@@ -351,12 +359,39 @@ if countries and sum(trip_counts) > 0:
             - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         else:
-            risk_comparison = "higher" if total_cases > global_benchmark_cases else "lower"
+            # Dynamic intro and detailed risk comparison
             st.write(f"""
-            Your simulation of **{total_trips:,} trips** to **{countries_list_str}** reveals a risk profile **{risk_comparison}** than the global average. This is not just a number; it represents potential challenges to your travelers and your business operations.
+            Your simulation of **{total_trips:,} trips** to **{countries_list_str}** has identified several key risks. Here is a breakdown of your top 3 estimated case types, with a comparison to the global average.
             """)
             st.write("")
+            
+            # Build the list of higher-risk case types
+            higher_risk_messages = []
+            for case_type, user_cases in user_top_3_cases.iterrows():
+                user_percentage = user_cases['Estimated Cases'] / total_cases
+                
+                # Check if the case type exists in the global benchmark
+                if case_type in global_benchmark_cases_df.index:
+                    global_cases = global_benchmark_cases_df.loc[case_type, 'Benchmark Cases']
+                    global_percentage = global_cases / global_benchmark_cases_df.sum().iloc[0]
+                    
+                    if user_percentage > global_percentage:
+                        higher_risk_messages.append(f"**- {case_type}** cases are **{user_percentage/global_percentage:.1f}x higher** than the global average.")
+
+            if higher_risk_messages:
+                st.markdown(f"""
+                <p style="font-weight: bold; color:#D4002C; font-size:18px;">
+                🚨 Higher Risk Alert: You have a higher exposure to the following risks:
+                </p>
+                """, unsafe_allow_html=True)
+                for msg in higher_risk_messages:
+                    st.markdown(msg)
+                st.write("")
+            else:
+                st.info("Your top case types are not disproportionately higher than the global average, but proactive management is still essential.")
+            
             st.markdown("""
+            Based on these insights, International SOS can help you:
             - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
             - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
             - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
