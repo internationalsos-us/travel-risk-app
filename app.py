@@ -519,7 +519,7 @@ if countries and sum(trip_counts) > 0:
                     marker_color='#D4002C',
                     text=[f"{val:.1f}x higher" for val in chart_data['risk_multiple']],
                     textposition='outside',
-                    textfont=dict(color='#D4002C', size=14, family='Arial, sans-serif')
+                    textfont=dict(color='#D4002C', size=14)
                 ))
 
                 fig.update_layout(
