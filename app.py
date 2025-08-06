@@ -83,6 +83,8 @@ st.markdown("""
     display: flex;
     justify-content: center;
     margin-bottom: 15px;
+    height: 50px; /* fix toggle height */
+    align-items: center;
 }
 .toggle-btn {
     padding: 8px 18px;
@@ -100,6 +102,9 @@ st.markdown("""
 .toggle-unselected {
     background-color: #cccccc;
     color: black;
+}
+.fixed-dropdown {
+    height: 50px; /* fix dropdown height */
 }
 </style>
 
@@ -222,8 +227,10 @@ if countries:
 
         # User Pie Chart
         with col_user:
-            st.markdown("#### My Selected Countries")
+            st.markdown('<div class="fixed-dropdown">', unsafe_allow_html=True)
             filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
+            st.markdown('</div>', unsafe_allow_html=True)
+
             if filter_country == "All":
                 case_totals_user = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().reset_index()
                 case_totals_user.columns = ["Case Type", "Estimated Cases"]
@@ -234,7 +241,6 @@ if countries:
                 country_data.columns = ["Case Type", "Estimated Cases"]
                 case_totals_user = country_data
 
-            case_totals_user = case_totals_user.sort_values(by="Estimated Cases", ascending=False)
             fig_user = px.pie(
                 case_totals_user,
                 values="Estimated Cases",
@@ -252,28 +258,23 @@ if countries:
                 st.session_state.benchmark_mode = "Global Average"
 
             st.markdown('<div class="toggle-bar">', unsafe_allow_html=True)
-
             col_btn1, col_btn2 = st.columns([1,1])
             with col_btn1:
                 if st.button(
                     "Global Average",
-                    key="global_btn",
-                    help="Compare against the global average"
+                    key="global_btn"
                 ):
                     st.session_state.benchmark_mode = "Global Average"
             with col_btn2:
                 if st.button(
                     "Regional Average",
-                    key="regional_btn",
-                    help="Compare against a regional average"
+                    key="regional_btn"
                 ):
                     st.session_state.benchmark_mode = "Regional Average"
-
             st.markdown('</div>', unsafe_allow_html=True)
 
             if st.session_state.benchmark_mode == "Global Average":
-                global_avg = data[case_columns].mean()
-                case_totals_bench = global_avg.reset_index()
+                case_totals_bench = data[case_columns].mean().reset_index()
                 case_totals_bench.columns = ["Case Type", "Estimated Cases"]
                 case_totals_bench["Estimated Cases"] = case_totals_bench["Estimated Cases"] * total_trips
             else:
@@ -284,7 +285,6 @@ if countries:
                 case_totals_bench.columns = ["Case Type", "Estimated Cases"]
                 case_totals_bench["Estimated Cases"] = case_totals_bench["Estimated Cases"] * total_trips
 
-            case_totals_bench = case_totals_bench.sort_values(by="Estimated Cases", ascending=False)
             fig_bench = px.pie(
                 case_totals_bench,
                 values="Estimated Cases",
@@ -330,4 +330,6 @@ International SOS can help you:
 # Footer
 st.markdown("""
 <div style="text-align:center; font-size:12px; color:gray; margin-top:20px;">
-© 2
+© 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.
+</div>
+""", unsafe_allow_html=True)
