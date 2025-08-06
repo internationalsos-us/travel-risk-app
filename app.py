@@ -98,12 +98,12 @@ h2, strong, b {
     z-index: 2;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: space-between; /* Adjusted to space out content */
     height: 100%;
 }
 .top-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end; /* Align logo to the right */
     align-items: center;
     padding: 0 10px;
     margin-bottom: 20px;
@@ -122,28 +122,10 @@ h2, strong, b {
     font-size: 28px;
     margin: 0;
     color: white;
+    max-width: 30%; /* Restrict text width to 30% */
 }
 .banner-nav {
-    display: flex;
-    gap: 20px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-.banner-nav-link a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s;
-}
-.banner-nav-link a:hover {
-    color: #FFD744;
-}
-.header-intro-text {
-    font-size: 36px;
-    font-weight: bold;
-    max-width: 50%;
-    margin-top: 50px;
+    display: none; /* Remove menu */
 }
 /* General app styles */
 .toggle-btn {
@@ -192,29 +174,25 @@ h2, strong, b {
 .stPlotlyChart {
     background-color: transparent !important;
 }
+.main-content-wrapper {
+    margin: 0 15%;
+}
 </style>
 
 <div class="main-banner">
     <div class="banner-overlay"></div>
     <div class="banner-content">
         <div class="top-header">
-            <div class="logo-and-title">
-                <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png"
-                     alt="International SOS" class="banner-logo-img">
-            </div>
-            <ul class="banner-nav">
-                <li class="banner-nav-link"><a href="#enter-trip-volumes">Enter Trip Volumes</a></li>
-                <li class="banner-nav-link"><a href="#estimated-needs">Estimated Needs</a></li>
-                <li class="banner-nav-link"><a href="#case-breakdown">Case Breakdown</a></li>
-                <li class="banner-nav-link"><a href="#what-it-means">What It Means</a></li>
-                <li class="banner-nav-link"><a href="#risk-outlook">Risk Outlook</a></li>
-                <li class="banner-nav-link"><a href="#get-in-touch">Get in Touch</a></li>
-            </ul>
+            <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png"
+                 alt="International SOS" class="banner-logo-img">
         </div>
         <h1 class="banner-h1">Assistance and Travel Risks Simulation Report</h1>
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# Start of main content wrapper
+st.markdown('<div class="main-content-wrapper">', unsafe_allow_html=True)
 
 st.write("")
 st.write("")
@@ -230,7 +208,6 @@ It uses International SOS proprietary data collected from millions of cases glob
 st.write("")
 st.write("")
 
-# Add an anchor for the "Enter Trip Volumes" section
 st.markdown('<div id="enter-trip-volumes"></div>', unsafe_allow_html=True)
 # -------------------------
 # Input Section
@@ -307,7 +284,6 @@ if countries and sum(trip_counts) > 0:
         total_cases = results_df["Total Cases"].sum()
 
         st.markdown('---')
-        # Add an anchor for the "Your Estimated Assistance Needs" section
         st.markdown('<div id="estimated-needs"></div>', unsafe_allow_html=True)
         st.markdown('<h2 style="color:#2f4696;">Your Estimated Assistance Needs</h2>', unsafe_allow_html=True)
         st.write("")
@@ -329,7 +305,6 @@ if countries and sum(trip_counts) > 0:
         st.write("")
 
         st.markdown('---')
-        # Add an anchor for the "Your Case Type Breakdown" section
         st.markdown('<div id="case-breakdown"></div>', unsafe_allow_html=True)
         # -------------------------
         # Case Type Breakdown
@@ -438,7 +413,6 @@ if countries and sum(trip_counts) > 0:
         st.write("")
         
         st.markdown('---')
-        # Add an anchor for the "What These Results Mean for You" section
         st.markdown('<div id="what-it-means"></div>', unsafe_allow_html=True)
         # -------------------------
         # Recommendations Section
@@ -573,7 +547,6 @@ if countries and sum(trip_counts) > 0:
         st.write("")
 
         st.markdown('---')
-        # Add an anchor for the "Explore the Risk Outlook 2025 Report" section
         st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html=True)
         # -------------------------
         # Risk Outlook section
