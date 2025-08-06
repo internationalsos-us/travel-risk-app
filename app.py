@@ -114,7 +114,7 @@ st.markdown("""
 }
 .risk-alert-box {
     background-color: #ffe6e6; /* Light red background */
-    border-left: 5px solid #D4002C; /* Red border on the left */
+    border-left: 5px solid #EF820F; /* Orange border on the left */
     padding: 20px;
     margin: 20px 0;
     border-radius: 5px;
@@ -125,12 +125,12 @@ st.markdown("""
     display: flex;
     justify-content: space-between;
     gap: 20px;
-    margin-top: 20px;
+    margin: 20px 0;
     flex-wrap: wrap;
 }
 .risk-card {
     flex: 1 1 300px; /* Allow cards to wrap on smaller screens */
-    background-color: #2f4696;
+    background-color: #232762;
     color: white;
     padding: 20px;
     border-radius: 10px;
@@ -438,7 +438,7 @@ if countries and sum(trip_counts) > 0:
             if higher_risk_messages:
                 st.markdown("""
                 <div class="risk-alert-box">
-                    <p style="font-weight: bold; color:#D4002C; font-size:18px; margin: 0;">
+                    <p style="font-weight: bold; color:#EF820F; font-size:18px; margin: 0;">
                     🚨 Higher Risk Alert: Your exposure is higher in the following areas:
                     </p>
                 </div>
@@ -449,7 +449,7 @@ if countries and sum(trip_counts) > 0:
                         f"""
                         <div class="risk-card">
                             <p class="risk-card-title">{risk['case_type']} cases</p>
-                            <p class="risk-card-text">are <span style="color:#D4002C;font-weight:bold;">{risk['risk_multiple']:.1f}x higher</span> than the global average.</p>
+                            <p class="risk-card-text">are <span style="color:#EF820F;font-weight:bold;">{risk['risk_multiple']:.1f}x higher</span> than the global average.</p>
                         </div>
                         """, unsafe_allow_html=True
                     )
@@ -461,7 +461,7 @@ if countries and sum(trip_counts) > 0:
             st.markdown("""
             Based on these insights, International SOS can help you:
             - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
-            - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
+            - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **247 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
             - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
             - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
