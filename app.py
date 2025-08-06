@@ -79,13 +79,6 @@ st.markdown("""
         color: white !important;
     }
 }
-.toggle-bar {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 15px;
-    height: 50px; /* fix toggle height */
-    align-items: center;
-}
 .toggle-btn {
     padding: 8px 18px;
     border-radius: 20px;
@@ -102,9 +95,6 @@ st.markdown("""
 .toggle-unselected {
     background-color: #cccccc;
     color: black;
-}
-.fixed-dropdown {
-    height: 50px; /* fix dropdown height */
 }
 </style>
 
@@ -262,7 +252,6 @@ if countries and sum(trip_counts) > 0:
                 color_discrete_map=case_type_colors,
                 title="Your Estimated Case Breakdown"
             )
-            # Removed pull and marker lines to remove space and black lines
             fig_user.update_traces(textinfo="label+percent", textposition="outside",
                                    marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)))
             fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
@@ -273,28 +262,23 @@ if countries and sum(trip_counts) > 0:
         with col_bench:
             if "benchmark_mode" not in st.session_state:
                 st.session_state.benchmark_mode = "Global Average"
-
-            btn_col1, btn_col2 = st.columns(2)
-            with btn_col1:
-                # Use a unique key for the button and link it to a callback function
-                if st.button("Global Average", key="global_btn", use_container_width=True):
-                    st.session_state.benchmark_mode = "Global Average"
-            with btn_col2:
-                if st.button("Regional Average", key="regional_btn", use_container_width=True):
-                    st.session_state.benchmark_mode = "Regional Average"
             
-            # Apply styling based on the session state
+            col_btn1, col_btn2 = st.columns(2)
+            
+            # Use buttons to set the state
+            with col_btn1:
+                if st.button("Global Average", key="global_btn_logic"):
+                    st.session_state.benchmark_mode = "Global Average"
+            with col_btn2:
+                if st.button("Regional Average", key="regional_btn_logic"):
+                    st.session_state.benchmark_mode = "Regional Average"
+
+            # Re-render buttons with styling based on state
             st.markdown(f"""
-            <style>
-                #global_btn > div > div > button {{
-                    background-color: {'#2f4696' if st.session_state.benchmark_mode == 'Global Average' else '#cccccc'};
-                    color: {'white' if st.session_state.benchmark_mode == 'Global Average' else 'black'};
-                }}
-                #regional_btn > div > div > button {{
-                    background-color: {'#2f4696' if st.session_state.benchmark_mode == 'Regional Average' else '#cccccc'};
-                    color: {'white' if st.session_state.benchmark_mode == 'Regional Average' else 'black'};
-                }}
-            </style>
+            <div style="display:flex; justify-content:center;">
+                <button class="toggle-btn {'toggle-selected' if st.session_state.benchmark_mode == 'Global Average' else 'toggle-unselected'}">Global Average</button>
+                <button class="toggle-btn {'toggle-selected' if st.session_state.benchmark_mode == 'Regional Average' else 'toggle-unselected'}">Regional Average</button>
+            </div>
             """, unsafe_allow_html=True)
             
             st.write("") # Add some space below buttons
@@ -332,7 +316,6 @@ if countries and sum(trip_counts) > 0:
                 color_discrete_map=case_type_colors,
                 title=benchmark_title
             )
-            # Removed pull and marker lines to remove space and black lines
             fig_bench.update_traces(textinfo="label+percent", textposition="outside",
                                     marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)))
             fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
@@ -341,9 +324,27 @@ if countries and sum(trip_counts) > 0:
 
         st.write("")
         st.write("")
+        
+        # -------------------------
+        # Recommendations Section (moved up)
+        # -------------------------
+        st.markdown('---')
+        st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
+        st.write("")
+        st.write("""
+Based on your trip volumes and chosen destinations, you could face a range of medical and security incidents.  
+International SOS can help you:
+- **Monitor global risks in real time** with our Risk Information Services and **Quantum** digital platform.  
+- **Support travelers 24/7** with immediate access to doctors, security experts, and interpreters.  
+- **Plan for medical and security evacuations**, ensuring employees can be moved quickly and safely if needed.  
+- **Fulfill your Duty of Care** by aligning with global standards like ISO 31030.  
+        """)
+
+        st.write("")
+        st.write("")
 
         # -------------------------
-        # Risk Outlook section
+        # Risk Outlook section (moved down)
         # -------------------------
         st.markdown('---')
         st.markdown("""
@@ -371,24 +372,6 @@ if countries and sum(trip_counts) > 0:
             </div>
         </div>
         """, unsafe_allow_html=True)
-
-        st.write("")
-        st.write("")
-
-        # -------------------------
-        # Recommendations Section
-        # -------------------------
-        st.markdown('---')
-        st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
-        st.write("")
-        st.write("""
-Based on your trip volumes and chosen destinations, you could face a range of medical and security incidents.  
-International SOS can help you:
-- **Monitor global risks in real time** with our Risk Information Services and **Quantum** digital platform.  
-- **Support travelers 24/7** with immediate access to doctors, security experts, and interpreters.  
-- **Plan for medical and security evacuations**, ensuring employees can be moved quickly and safely if needed.  
-- **Fulfill your Duty of Care** by aligning with global standards like ISO 31030.  
-        """)
 
 st.write("")
 st.markdown('---')
