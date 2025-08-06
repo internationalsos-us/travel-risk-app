@@ -218,7 +218,7 @@ if countries and sum(trip_counts) > 0:
         st.write("")
 
         # -------------------------
-        # Case Type Breakdown
+        # Your Case Type Breakdown
         # -------------------------
         st.markdown('---')
         col_controls_left, col_controls_right = st.columns(2)
