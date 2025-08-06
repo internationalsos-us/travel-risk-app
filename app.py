@@ -297,7 +297,7 @@ if countries and sum(trip_counts) > 0:
                 if available_regions:
                     primary_region = region_mapping.get(countries[0]) if countries and countries[0] in region_mapping else available_regions[0]
                     default_index = available_regions.index(primary_region) if primary_region in available_regions else 0
-                    selected_region = st.selectbox("Select a region", available_regions, index=default_index, key="region_select", label="Select a region")
+                    selected_region = st.selectbox("Select a region", available_regions, index=default_index, key="region_select")
                     region_avg = data[data["Region"] == selected_region][case_columns].mean()
                     case_totals_bench = region_avg.reset_index()
                     case_totals_bench.columns = ["Case Type", "Benchmark Cases"]
