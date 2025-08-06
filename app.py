@@ -115,7 +115,7 @@ st.markdown("""
     color: black;
 }
 .risk-alert-box {
-    background-color: rgba(212, 0, 44, 0.7); /* Semi-transparent red background */
+    background-color: rgba(212, 0, 44, 0.5); /* Semi-transparent red background */
     border-left: 5px solid #EF820F; /* Orange border on the left */
     padding: 20px;
     margin: 20px 0;
@@ -459,8 +459,8 @@ if countries and sum(trip_counts) > 0:
                     font_color="black",
                     xaxis_title=None,
                     yaxis_title=None,
-                    plot_bgcolor=None,
-                    paper_bgcolor=None,
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
                     xaxis=dict(showgrid=False, range=[0, chart_data['risk_multiple'].max() * 1.1]),
                     yaxis=dict(showgrid=False),
                     showlegend=False,
