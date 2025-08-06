@@ -263,23 +263,32 @@ if countries and sum(trip_counts) > 0:
             if "benchmark_mode" not in st.session_state:
                 st.session_state.benchmark_mode = "Global Average"
             
+            # --- Button Logic for Toggling ---
             col_btn1, col_btn2 = st.columns(2)
             
-            # Use buttons to set the state
-            with col_btn1:
-                if st.button("Global Average", key="global_btn_logic"):
-                    st.session_state.benchmark_mode = "Global Average"
-            with col_btn2:
-                if st.button("Regional Average", key="regional_btn_logic"):
-                    st.session_state.benchmark_mode = "Regional Average"
+            # Set the new mode based on button clicks
+            if col_btn1.button("Global Average", key="global_btn_click", use_container_width=True):
+                st.session_state.benchmark_mode = "Global Average"
+            if col_btn2.button("Regional Average", key="regional_btn_click", use_container_width=True):
+                st.session_state.benchmark_mode = "Regional Average"
 
-            # Re-render buttons with styling based on state
+            # Apply CSS styling based on the current mode
+            global_class = 'toggle-selected' if st.session_state.benchmark_mode == 'Global Average' else 'toggle-unselected'
+            regional_class = 'toggle-selected' if st.session_state.benchmark_mode == 'Regional Average' else 'toggle-unselected'
+            
             st.markdown(f"""
-            <div style="display:flex; justify-content:center;">
-                <button class="toggle-btn {'toggle-selected' if st.session_state.benchmark_mode == 'Global Average' else 'toggle-unselected'}">Global Average</button>
-                <button class="toggle-btn {'toggle-selected' if st.session_state.benchmark_mode == 'Regional Average' else 'toggle-unselected'}">Regional Average</button>
-            </div>
+            <style>
+                div[data-testid="stColumn"]:nth-child(2) > div > button[data-testid="base-button-secondary"]:nth-child(1) {{
+                    background-color: {'#2f4696' if st.session_state.benchmark_mode == 'Global Average' else '#cccccc'};
+                    color: {'white' if st.session_state.benchmark_mode == 'Global Average' else 'black'};
+                }}
+                div[data-testid="stColumn"]:nth-child(2) > div > button[data-testid="base-button-secondary"]:nth-child(2) {{
+                    background-color: {'#2f4696' if st.session_state.benchmark_mode == 'Regional Average' else '#cccccc'};
+                    color: {'white' if st.session_state.benchmark_mode == 'Regional Average' else 'black'};
+                }}
+            </style>
             """, unsafe_allow_html=True)
+            # --- End Button Logic ---
             
             st.write("") # Add some space below buttons
 
@@ -372,8 +381,6 @@ International SOS can help you:
             </div>
         </div>
         """, unsafe_allow_html=True)
-
-st.write("")
 st.markdown('---')
 st.write("")
 
