@@ -153,7 +153,7 @@ for i in range(1, st.session_state.num_rows + 1):
     with col2:
         trips = st.number_input(f"Trips for {country or f'Country {i}'}",
                                 min_value=0, value=0, step=1, key=f"trav{i}")
-    if country:
+    if country and trips > 0:
         countries.append(country)
         trip_counts.append(trips)
 
@@ -262,7 +262,9 @@ if countries and sum(trip_counts) > 0:
                 color_discrete_map=case_type_colors,
                 title="Your Estimated Case Breakdown"
             )
-            fig_user.update_traces(textinfo="label+percent", textposition="outside", marker=dict(line=dict(color='#000000', width=1)), pull=[0.05] * len(case_totals_user))
+            # Removed pull and marker lines to remove space and black lines
+            fig_user.update_traces(textinfo="label+percent", textposition="outside",
+                                   marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)))
             fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_user, use_container_width=True)
@@ -274,16 +276,27 @@ if countries and sum(trip_counts) > 0:
 
             btn_col1, btn_col2 = st.columns(2)
             with btn_col1:
-                global_btn_class = "toggle-selected" if st.session_state.benchmark_mode == "Global Average" else "toggle-unselected"
-                if st.button("Global Average", key="global_btn", help="Click to view global average benchmark"):
+                # Use a unique key for the button and link it to a callback function
+                if st.button("Global Average", key="global_btn", use_container_width=True):
                     st.session_state.benchmark_mode = "Global Average"
-                    st.rerun()
             with btn_col2:
-                regional_btn_class = "toggle-selected" if st.session_state.benchmark_mode == "Regional Average" else "toggle-unselected"
-                if st.button("Regional Average", key="regional_btn", help="Click to view regional average benchmark"):
+                if st.button("Regional Average", key="regional_btn", use_container_width=True):
                     st.session_state.benchmark_mode = "Regional Average"
-                    st.rerun()
-
+            
+            # Apply styling based on the session state
+            st.markdown(f"""
+            <style>
+                #global_btn > div > div > button {{
+                    background-color: {'#2f4696' if st.session_state.benchmark_mode == 'Global Average' else '#cccccc'};
+                    color: {'white' if st.session_state.benchmark_mode == 'Global Average' else 'black'};
+                }}
+                #regional_btn > div > div > button {{
+                    background-color: {'#2f4696' if st.session_state.benchmark_mode == 'Regional Average' else '#cccccc'};
+                    color: {'white' if st.session_state.benchmark_mode == 'Regional Average' else 'black'};
+                }}
+            </style>
+            """, unsafe_allow_html=True)
+            
             st.write("") # Add some space below buttons
 
             if st.session_state.benchmark_mode == "Global Average":
@@ -319,7 +332,9 @@ if countries and sum(trip_counts) > 0:
                 color_discrete_map=case_type_colors,
                 title=benchmark_title
             )
-            fig_bench.update_traces(textinfo="label+percent", textposition="outside", marker=dict(line=dict(color='#000000', width=1)), pull=[0.05] * len(case_totals_bench))
+            # Removed pull and marker lines to remove space and black lines
+            fig_bench.update_traces(textinfo="label+percent", textposition="outside",
+                                    marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)))
             fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
                                     margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_bench, use_container_width=True)
@@ -331,26 +346,29 @@ if countries and sum(trip_counts) > 0:
         # Risk Outlook section
         # -------------------------
         st.markdown('---')
-        st.markdown('<h2 style="color:#2f4696;">Risk Outlook</h2>', unsafe_allow_html=True)
-        st.write("")
-        st.markdown(f"""
-        <div style="background-color: #EEEFEF; padding: 25px; border-radius: 10px;">
-        <div style="display: flex; align-items: center; gap: 20px;">
-            <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B39e1a179-8472-466d-a19c-30b1448651c6%7D_Risk_Map_2024.png"
-                 alt="Risk Map" style="height:150px; width:auto; border-radius:10px;">
-            <div>
-                <h3 style="margin-top: 0; color:#2f4696;">Your International SOS Risk Report</h3>
-                <p style="margin-bottom: 0;">
-                To gain a full understanding of the risk exposure facing your organisation, our
-                analysts can provide a comprehensive report that covers:
-                </p>
-                <ul>
-                    <li>Medical and Security risk ratings for each of your destinations.</li>
-                    <li>The key risks your travelers may face on the ground.</li>
-                    <li>Expert recommendations to protect your people and fulfill your duty of care.</li>
-                </ul>
+        st.markdown("""
+        <div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
+            <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
+            <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:300px; text-align:center;">
+                    <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
+                         alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
+                </div>
+                <div style="flex:1; min-width:300px;">
+                    <p style="font-size:16px; line-height:1.6; color:#333;">
+                        The <b>Risk Outlook 2025</b> is our flagship annual study, providing actionable insights into the key medical and security
+                        challenges facing organizations worldwide. Developed with expert analysis and global data, it helps leaders prepare
+                        for the unexpected and safeguard their workforce.
+                    </p>
+                    <p style="text-align:left; margin-top:20px;">
+                        <a href="https://www.internationalsos.com/risk-outlook?utm_source=riskreport" target="_blank"
+                           style="background-color:#2f4696; color:white; font-weight:bold;
+                                  padding:12px 24px; text-decoration:none; border-radius:8px;">
+                            📘 Access the Risk Outlook 2025 Report
+                        </a>
+                    </p>
+                </div>
             </div>
-        </div>
         </div>
         """, unsafe_allow_html=True)
 
