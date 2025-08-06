@@ -221,19 +221,63 @@ if countries and sum(trip_counts) > 0:
         # Case Type Breakdown
         # -------------------------
         st.markdown('---')
-        col_title_left, col_title_right = st.columns(2)
-        with col_title_left:
+        col_controls_left, col_controls_right = st.columns(2)
+        with col_controls_left:
             st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
-        with col_title_right:
-            st.markdown('<span style="font-weight: bold; color: #2f4696;">Benchmark against:</span>', unsafe_allow_html=True)
-        st.write("")
-
-        col_user, col_bench = st.columns(2)
-
-        # User Pie Chart
-        with col_user:
             filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
+        with col_controls_right:
+            st.markdown('<span style="font-weight: bold; color: #2f4696;">Benchmark against:</span>', unsafe_allow_html=True)
+            if "benchmark_mode" not in st.session_state:
+                st.session_state.benchmark_mode = "Global Average"
             
+            col_btn1, col_btn2 = st.columns(2)
+            
+            if col_btn1.button("Global Average", key="global_btn_click", use_container_width=True):
+                st.session_state.benchmark_mode = "Global Average"
+            if col_btn2.button("Regional Average", key="regional_btn_click", use_container_width=True):
+                st.session_state.benchmark_mode = "Regional Average"
+
+            st.markdown(f"""
+            <style>
+                div[data-testid="stColumn"]:nth-child(2) > div > button[data-testid="base-button-secondary"]:nth-child(1) {{
+                    background-color: {'#2f4696' if st.session_state.benchmark_mode == 'Global Average' else '#cccccc'};
+                    color: {'white' if st.session_state.benchmark_mode == 'Global Average' else 'black'};
+                }}
+                div[data-testid="stColumn"]:nth-child(2) > div > button[data-testid="base-button-secondary"]:nth-child(2) {{
+                    background-color: {'#2f4696' if st.session_state.benchmark_mode == 'Regional Average' else '#cccccc'};
+                    color: {'white' if st.session_state.benchmark_mode == 'Regional Average' else 'black'};
+                }}
+            </style>
+            """, unsafe_allow_html=True)
+            
+            if st.session_state.benchmark_mode == "Global Average":
+                benchmark_title = "Global Average Case Breakdown"
+                case_totals_bench = data[case_columns].mean().reset_index()
+                case_totals_bench.columns = ["Case Type", "Benchmark Cases"]
+                case_totals_bench["Benchmark Cases"] = case_totals_bench["Benchmark Cases"] * total_trips
+            else:
+                available_regions = sorted(data["Region"].dropna().unique())
+                if available_regions:
+                    primary_region = region_mapping.get(countries[0]) if countries and countries[0] in region_mapping else available_regions[0]
+                    default_index = available_regions.index(primary_region) if primary_region in available_regions else 0
+                    selected_region = st.selectbox("Select a region", available_regions, index=default_index, key="region_select")
+                    region_avg = data[data["Region"] == selected_region][case_columns].mean()
+                    case_totals_bench = region_avg.reset_index()
+                    case_totals_bench.columns = ["Case Type", "Benchmark Cases"]
+                    case_totals_bench["Benchmark Cases"] = case_totals_bench["Benchmark Cases"] * total_trips
+                    benchmark_title = f"{selected_region} Average Case Breakdown"
+                else:
+                    st.warning("No region data available for benchmarking.")
+                    case_totals_bench = pd.DataFrame(columns=["Case Type", "Benchmark Cases"])
+                    benchmark_title = "Regional Average Case Breakdown"
+            
+            case_totals_bench['Case Type'] = case_totals_bench['Case Type'].apply(lambda x: x.replace(' Case Probability', ''))
+            case_totals_bench = case_totals_bench.set_index('Case Type').reindex(case_type_colors.keys()).reset_index()
+            case_totals_bench = case_totals_bench.dropna(subset=['Benchmark Cases'])
+
+        # Pie Charts
+        col_user_chart, col_bench_chart = st.columns(2)
+        with col_user_chart:
             if filter_country == "All":
                 case_totals_user = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().reset_index()
                 case_totals_user.columns = ["Case Type", "Estimated Cases"]
@@ -262,56 +306,7 @@ if countries and sum(trip_counts) > 0:
                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_user, use_container_width=True)
 
-        # Benchmark Pie Chart with Styled Toggle
-        with col_bench:
-            if "benchmark_mode" not in st.session_state:
-                st.session_state.benchmark_mode = "Global Average"
-            
-            col_btn1, col_btn2 = st.columns(2)
-            
-            if col_btn1.button("Global Average", key="global_btn_click", use_container_width=True):
-                st.session_state.benchmark_mode = "Global Average"
-            if col_btn2.button("Regional Average", key="regional_btn_click", use_container_width=True):
-                st.session_state.benchmark_mode = "Regional Average"
-
-            st.markdown(f"""
-            <style>
-                div[data-testid="stColumn"]:nth-child(2) > div > button[data-testid="base-button-secondary"]:nth-child(1) {{
-                    background-color: {'#2f4696' if st.session_state.benchmark_mode == 'Global Average' else '#cccccc'};
-                    color: {'white' if st.session_state.benchmark_mode == 'Global Average' else 'black'};
-                }}
-                div[data-testid="stColumn"]:nth-child(2) > div > button[data-testid="base-button-secondary"]:nth-child(2) {{
-                    background-color: {'#2f4696' if st.session_state.benchmark_mode == 'Regional Average' else '#cccccc'};
-                    color: {'white' if st.session_state.benchmark_mode == 'Regional Average' else 'black'};
-                }}
-            </style>
-            """, unsafe_allow_html=True)
-            
-            if st.session_state.benchmark_mode == "Global Average":
-                case_totals_bench = data[case_columns].mean().reset_index()
-                case_totals_bench.columns = ["Case Type", "Benchmark Cases"]
-                case_totals_bench["Benchmark Cases"] = case_totals_bench["Benchmark Cases"] * total_trips
-                benchmark_title = "Global Average Case Breakdown"
-            else:
-                available_regions = sorted(data["Region"].dropna().unique())
-                if available_regions:
-                    primary_region = region_mapping.get(countries[0]) if countries and countries[0] in region_mapping else available_regions[0]
-                    default_index = available_regions.index(primary_region) if primary_region in available_regions else 0
-                    selected_region = st.selectbox("Select a region", available_regions, index=default_index, key="region_select")
-                    region_avg = data[data["Region"] == selected_region][case_columns].mean()
-                    case_totals_bench = region_avg.reset_index()
-                    case_totals_bench.columns = ["Case Type", "Benchmark Cases"]
-                    case_totals_bench["Benchmark Cases"] = case_totals_bench["Benchmark Cases"] * total_trips
-                    benchmark_title = f"{selected_region} Average Case Breakdown"
-                else:
-                    st.warning("No region data available for benchmarking.")
-                    case_totals_bench = pd.DataFrame(columns=["Case Type", "Benchmark Cases"])
-                    benchmark_title = "Regional Average Case Breakdown"
-
-            case_totals_bench['Case Type'] = case_totals_bench['Case Type'].apply(lambda x: x.replace(' Case Probability', ''))
-            case_totals_bench = case_totals_bench.set_index('Case Type').reindex(case_type_colors.keys()).reset_index()
-            case_totals_bench = case_totals_bench.dropna(subset=['Benchmark Cases'])
-
+        with col_bench_chart:
             fig_bench = px.pie(
                 case_totals_bench,
                 values="Benchmark Cases",
@@ -325,7 +320,7 @@ if countries and sum(trip_counts) > 0:
             fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
                                     margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_bench, use_container_width=True)
-
+            
         st.write("")
         st.write("")
         
