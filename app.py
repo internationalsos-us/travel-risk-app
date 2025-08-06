@@ -83,17 +83,17 @@ st.write("")
 # -------------------------
 st.markdown('<h1 style="color:#232762;">Welcome to the International SOS Travel Risk Simulation Tool</h1>', unsafe_allow_html=True)
 st.write("""
-This tool provides a simulation of potential medical and security assistance cases based on your travel volumes.
+This tool provides a simulation of potential medical and security assistance cases based on your **trip volumes**.
 It uses International SOS proprietary data collected from millions of cases globally.
 """)
 
 # -------------------------
 # Input Section
 # -------------------------
-st.markdown('<h2 style="color:#2f4696;">Enter Trips Data</h2>', unsafe_allow_html=True)
-st.write("Select countries and input yearly trip numbers for each destination. Add more countries if needed.")
+st.markdown('<h2 style="color:#2f4696;">Step 1: Enter Trip Volumes</h2>', unsafe_allow_html=True)
+st.write("Select countries and input estimated annual trip volumes. Add more countries if needed.")
 
-countries, traveler_counts = [], []
+countries, trip_counts = [], []
 country_options = sorted(data["Country"].dropna().unique())
 
 if "num_rows" not in st.session_state:
@@ -104,11 +104,11 @@ for i in range(1, st.session_state.num_rows + 1):
     with col1:
         country = st.selectbox(f"Destination Country {i}", [""] + list(country_options), key=f"country{i}")
     with col2:
-        travelers = st.number_input(f"Yearly trips to {country or f'Country {i}'}",
-                                    min_value=0, value=0, step=1, key=f"trav{i}")
+        trips = st.number_input(f"Trips for {country or f'Country {i}'}",
+                                min_value=0, value=0, step=1, key=f"trav{i}")
     if country:
         countries.append(country)
-        traveler_counts.append(travelers)
+        trip_counts.append(trips)
 
 # Add/Remove buttons under the last input field
 col_add, col_remove = st.columns([1,1])
@@ -122,38 +122,54 @@ with col_remove:
         st.rerun()
 
 # -------------------------
+# Region Mapping (World Bank)
+# -------------------------
+region_mapping = {
+    # Subset for illustration; ideally, extend to all countries in your dataset
+    "Afghanistan": "South Asia", "Azerbaijan": "Europe & Central Asia", "Bangladesh": "South Asia",
+    "Benin": "Sub-Saharan Africa", "Brazil": "Latin America & Caribbean", "China": "East Asia & Pacific",
+    "Egypt": "Middle East & North Africa", "France": "Europe & Central Asia",
+    "India": "South Asia", "Japan": "East Asia & Pacific", "Kenya": "Sub-Saharan Africa",
+    "Mexico": "Latin America & Caribbean", "Nigeria": "Sub-Saharan Africa",
+    "Pakistan": "South Asia", "South Africa": "Sub-Saharan Africa", "United States": "North America",
+    "United Kingdom": "Europe & Central Asia"
+}
+data["Region"] = data["Country"].map(region_mapping)
+
+# -------------------------
 # Results Section
 # -------------------------
 if countries:
     results = []
-    for country, travelers in zip(countries, traveler_counts):
+    for country, trips in zip(countries, trip_counts):
         row = data[data["Country"].str.contains(country, case=False, na=False)]
         if not row.empty:
             case_data, total_cases = {}, 0
             for col in case_columns:
                 prob = row.iloc[0][col]
-                estimated = travelers * prob
+                estimated = trips * prob
                 case_data[col.replace(" Case Probability", "")] = estimated
                 total_cases += estimated
-            case_data.update({"Country": country, "Travelers": travelers, "Total Cases": total_cases})
+            case_data.update({"Country": country, "Trips": trips, "Total Cases": total_cases})
             results.append(case_data)
         else:
-            results.append({"Country": country, "Travelers": travelers, "Total Cases": 0})
+            results.append({"Country": country, "Trips": trips, "Total Cases": 0})
 
     results_df = pd.DataFrame(results)
 
     if not results_df.empty:
-        total_trips = results_df["Travelers"].sum()
+        total_trips = results_df["Trips"].sum()
         total_cases = results_df["Total Cases"].sum()
 
-        st.markdown('<h2 style="color:#2f4696;">Estimated Assistance Needs</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 style="color:#2f4696;">Step 2: Estimated Assistance Needs</h2>', unsafe_allow_html=True)
 
         col1, col2 = st.columns([1,2])
         with col1:
-            st.metric("Total Travelers", f"{total_trips:,}")
+            st.metric("Total Trips", f"{total_trips:,}")
             st.metric("Total Estimated Cases", f"{total_cases:.2f}")
             st.info("""
-Probabilities are based on the likelihood of assistance cases **per traveler**.  
+Probabilities are based on the likelihood of assistance cases **per trip**, 
+with values already converted into decimals (e.g., 0.74% = 0.0074).  
 """)
         with col2:
             fig = px.bar(results_df, x="Country", y="Total Cases", 
@@ -163,25 +179,47 @@ Probabilities are based on the likelihood of assistance cases **per traveler**.
                         color_discrete_sequence=["#2f4696", "#232762", "#4a69bd"])
             st.plotly_chart(fig, use_container_width=True)
 
-        # Toggle between overall and by-country case breakdown
+        # Benchmarking Options
         st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
-        view_option = st.radio("View case type breakdown by:", ["Overall", "By Country"], horizontal=True)
+        benchmark_option = st.radio(
+            "View case type breakdown by:",
+            ["My Selected Countries", "Global Average", "Regional Average"],
+            horizontal=True
+        )
 
-        if view_option == "Overall":
-            case_totals = results_df.drop(columns=["Country", "Travelers", "Total Cases"]).sum().reset_index()
+        # Global Average
+        global_avg = data[case_columns].mean()
+
+        if benchmark_option == "My Selected Countries":
+            if len(countries) > 1:
+                case_totals = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().reset_index()
+                case_totals.columns = ["Case Type", "Estimated Cases"]
+            else:
+                selected_country = st.selectbox("Select a country", results_df["Country"].unique())
+                country_data = results_df[results_df["Country"] == selected_country].drop(
+                    columns=["Country", "Trips", "Total Cases"]
+                ).T.reset_index()
+                country_data.columns = ["Case Type", "Estimated Cases"]
+                country_data["Estimated Cases"] = pd.to_numeric(country_data["Estimated Cases"], errors="coerce")
+                case_totals = country_data
+
+        elif benchmark_option == "Global Average":
+            case_totals = global_avg.reset_index()
             case_totals.columns = ["Case Type", "Estimated Cases"]
-        else:
-            selected_country = st.selectbox("Select a country", results_df["Country"].unique())
-            country_data = results_df[results_df["Country"] == selected_country].drop(
-                columns=["Country", "Travelers", "Total Cases"]
-            ).T.reset_index()
-            country_data.columns = ["Case Type", "Estimated Cases"]
-            country_data["Estimated Cases"] = pd.to_numeric(country_data["Estimated Cases"], errors="coerce")
-            case_totals = country_data
+            case_totals["Estimated Cases"] = case_totals["Estimated Cases"] * total_trips
 
-        # Sort descending by estimated cases
+        elif benchmark_option == "Regional Average":
+            available_regions = sorted(data["Region"].dropna().unique())
+            selected_region = st.selectbox("Select a region", available_regions)
+            region_avg = data[data["Region"] == selected_region][case_columns].mean()
+            case_totals = region_avg.reset_index()
+            case_totals.columns = ["Case Type", "Estimated Cases"]
+            case_totals["Estimated Cases"] = case_totals["Estimated Cases"] * total_trips
+
+        # Sort Descending
         case_totals = case_totals.sort_values(by="Estimated Cases", ascending=False)
 
+        # Pie Chart
         fig2 = px.pie(
             case_totals,
             values="Estimated Cases",
@@ -194,10 +232,10 @@ Probabilities are based on the likelihood of assistance cases **per traveler**.
         fig2.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
         st.plotly_chart(fig2, use_container_width=True)
 
-        # Recommendations Section
+        # Recommendations
         st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
         st.write("""
-Based on your traveler volumes and chosen destinations, you could face a range of medical and security incidents.  
+Based on your trip volumes and chosen destinations, you could face a range of medical and security incidents.  
 
 International SOS can help you:
 - **Monitor global risks in real time** with our Risk Information Services and **Quantum** digital platform.  
