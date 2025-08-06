@@ -126,7 +126,7 @@ st.write("")
 # -------------------------
 # Input Section
 # -------------------------
-st.markdown('<h2 style="color:#2f4696;">Step 1: Enter Trip Volumes</h2>', unsafe_allow_html=True)
+st.markdown('<h2 style="color:#2f4696;">Enter Trip Volumes</h2>', unsafe_allow_html=True)
 st.write("Select countries and input estimated annual trip volumes. Add more countries if needed.")
 st.write("")
 
@@ -198,7 +198,7 @@ if countries and sum(trip_counts) > 0:
         total_cases = results_df["Total Cases"].sum()
 
         st.markdown('---')
-        st.markdown('<h2 style="color:#2f4696;">Step 2: Estimated Assistance Needs</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 style="color:#2f4696;"> Your Estimated Assistance Needs</h2>', unsafe_allow_html=True)
         st.write("")
 
         col1, col2 = st.columns([1,2])
@@ -223,7 +223,7 @@ if countries and sum(trip_counts) > 0:
         st.markdown('---')
         col_controls_left, col_controls_right = st.columns(2)
         with col_controls_left:
-            st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
+            st.markdown('<h2 style="color:#2f4696;">Your Case Type Breakdown</h2>', unsafe_allow_html=True)
             filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
         with col_controls_right:
             st.markdown('<span style="font-weight: bold; color: #2f4696;">Benchmark against:</span>', unsafe_allow_html=True)
