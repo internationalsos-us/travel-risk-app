@@ -318,7 +318,7 @@ if countries and sum(trip_counts) > 0:
         # -------------------------
         # Case Type Breakdown
         # -------------------------
-        col_controls_left, col_controls_right = st.columns(2)
+        col_controls_left, col_controls_middle, col_controls_right = st.columns([1, 0.1, 1])
         with col_controls_left:
             st.markdown('<h2 style="color:#2f4696;">Your Case Type Breakdown</h2>', unsafe_allow_html=True)
             filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
@@ -373,7 +373,7 @@ if countries and sum(trip_counts) > 0:
             case_totals_bench = case_totals_bench.dropna(subset=['Benchmark Cases'])
 
         # Pie Charts
-        col_user_chart, col_bench_chart = st.columns(2)
+        col_user_chart, col_middle_chart, col_bench_chart = st.columns([1, 0.1, 1])
         with col_user_chart:
             if filter_country == "All":
                 case_totals_user = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().reset_index()
@@ -571,7 +571,7 @@ if countries and sum(trip_counts) > 0:
             <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
             <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
                 <div style="flex:1; min-width:300px; text-align:center;">
-                    <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
+                    <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=1b9b43d76cc94fc09d199cbe40e277a6"
                          alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
                 </div>
                 <div style="flex:1; min-width:300px;">
