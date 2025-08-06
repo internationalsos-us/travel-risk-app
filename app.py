@@ -126,6 +126,18 @@ st.markdown("""
     color: white;
     font-size: 18px;
     margin: 0;
+    display: flex;
+    align-items: center;
+}
+.alert-icon-circle {
+    background-color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
 }
 /* This CSS forces the Plotly chart container to have a transparent background */
 .stPlotlyChart {
@@ -392,7 +404,7 @@ if countries and sum(trip_counts) > 0:
             st.markdown("""
             <div class="risk-alert-box">
                 <p class="risk-alert-title">
-                🚨 Higher Risk Alert: Your exposure is higher than the global average in the following areas:
+                    <span class="alert-icon-circle">🚨</span> Higher Risk Alert: Your exposure is higher than the global average in the following areas:
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -455,7 +467,7 @@ if countries and sum(trip_counts) > 0:
                 fig.update_layout(
                     barmode='stack',
                     title='Your Higher Risk Areas vs. Global Average',
-                    title_x=0.5,
+                    title_x=0, # Left align title
                     font_color="black",
                     xaxis_title=None,
                     yaxis_title=None,
