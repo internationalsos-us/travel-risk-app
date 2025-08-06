@@ -54,7 +54,7 @@ case_type_services = {
 st.set_page_config(page_title="International SOS | Assistance & Travel Risks", layout="wide")
 
 # -------------------------
-# Banner with Logo
+# Banner with Logo and Custom CSS
 # -------------------------
 st.markdown("""
 <style>
@@ -115,7 +115,7 @@ st.markdown("""
     color: black;
 }
 .risk-alert-box {
-    background-color: #D4002C; /* Corporate red background */
+    background-color: rgba(212, 0, 44, 0.7); /* Semi-transparent red background */
     border-left: 5px solid #EF820F; /* Orange border on the left */
     padding: 20px;
     margin: 20px 0;
@@ -126,6 +126,10 @@ st.markdown("""
     color: white;
     font-size: 18px;
     margin: 0;
+}
+/* This CSS forces the Plotly chart container to have a transparent background */
+.stPlotlyChart {
+    background-color: transparent !important;
 }
 </style>
 
