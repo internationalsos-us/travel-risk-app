@@ -119,37 +119,6 @@ st.markdown("""
     margin: 20px 0;
     border-radius: 5px;
 }
-
-/* New CSS for the modern boxes */
-.risk-card-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    margin: 20px 0;
-}
-.risk-card {
-    flex: 1;
-    background-color: #232762;
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    min-height: 120px;
-}
-.risk-card-title {
-    font-weight: bold;
-    font-size: 18px;
-    margin-bottom: 5px;
-}
-.risk-card-text {
-    font-size: 16px;
-    margin: 0;
-}
 </style>
 
 <div class="banner-container">
@@ -433,7 +402,6 @@ if countries and sum(trip_counts) > 0:
                 sorted_risks = sorted(all_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
                 higher_risk_messages = sorted_risks[:3]
 
-
             if higher_risk_messages:
                 st.markdown("""
                 <div class="risk-alert-box">
@@ -442,18 +410,41 @@ if countries and sum(trip_counts) > 0:
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
-                st.markdown('<div class="risk-card-container">', unsafe_allow_html=True)
-                for risk in higher_risk_messages:
-                    st.markdown(
-                        f"""
-                        <div class="risk-card">
-                            <p class="risk-card-title">{risk['case_type']} cases</p>
-                            <p class="risk-card-text">are <span style="color:#EF820F;font-weight:bold;">{risk['risk_multiple']:.1f}x higher</span> than the global average.</p>
-                        </div>
-                        """, unsafe_allow_html=True
-                    )
-                st.markdown('</div>', unsafe_allow_html=True)
-                st.write("")
+                
+                # Prepare a DataFrame for the horizontal bar chart
+                chart_data = pd.DataFrame(higher_risk_messages)
+                chart_data['risk_multiple'] = chart_data['risk_multiple'].round(1)
+                
+                # Sort data for the chart
+                chart_data = chart_data.sort_values('risk_multiple', ascending=True)
+                
+                fig = px.bar(
+                    chart_data,
+                    x='risk_multiple',
+                    y='case_type',
+                    orientation='h',
+                    title='Your Higher Risk Areas vs. Global Average',
+                    color_discrete_sequence=["#EF820F"],
+                    labels={'risk_multiple': 'Risk Multiplier (x)', 'case_type': ''}
+                )
+                
+                fig.update_layout(
+                    title_x=0.5,
+                    font_color="black",
+                    xaxis_title=None,
+                    yaxis_title=None,
+                    plot_bgcolor='white',
+                    paper_bgcolor='white',
+                    xaxis=dict(showgrid=False),
+                    yaxis=dict(showgrid=False),
+                    showlegend=False,
+                    width=None,
+                    height=300
+                )
+                fig.update_traces(texttemplate='%{x:.1f}x higher', textposition='outside')
+                
+                st.plotly_chart(fig, use_container_width=True)
+
             else:
                 st.info("Your top case types are not disproportionately higher than the global average, but proactive management is still essential.")
             
