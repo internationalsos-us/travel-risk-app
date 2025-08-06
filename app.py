@@ -318,7 +318,7 @@ if countries and sum(trip_counts) > 0:
         # -------------------------
         # Case Type Breakdown
         # -------------------------
-        col_controls_left, col_controls_middle, col_controls_right = st.columns([1, 0.1, 1])
+        col_controls_left, col_controls_right = st.columns(2)
         with col_controls_left:
             st.markdown('<h2 style="color:#2f4696;">Your Case Type Breakdown</h2>', unsafe_allow_html=True)
             filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
@@ -373,7 +373,7 @@ if countries and sum(trip_counts) > 0:
             case_totals_bench = case_totals_bench.dropna(subset=['Benchmark Cases'])
 
         # Pie Charts
-        col_user_chart, col_middle_chart, col_bench_chart = st.columns([1, 0.1, 1])
+        col_user_chart, col_bench_chart = st.columns(2)
         with col_user_chart:
             if filter_country == "All":
                 case_totals_user = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().reset_index()
