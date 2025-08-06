@@ -126,21 +126,30 @@ st.markdown("""
     justify-content: space-between;
     gap: 20px;
     margin-top: 20px;
+    flex-wrap: wrap;
 }
 .risk-card {
-    flex: 1;
-    background-color: #f9f9f9;
-    padding: 15px;
+    flex: 1 1 300px; /* Allow cards to wrap on smaller screens */
+    background-color: #2f4696;
+    color: white;
+    padding: 20px;
     border-radius: 10px;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    font-size: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    min-height: 100px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    height: 100px; /* fixed height for alignment */
+}
+.risk-card-title {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+.risk-card-text {
+    font-size: 16px;
+    margin: 0;
 }
 </style>
 
@@ -411,7 +420,6 @@ if countries and sum(trip_counts) > 0:
             global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
             
             if user_total_cases > 0 and global_total_cases > 0:
-                # Calculate all higher-risk cases first
                 all_higher_risks = []
                 for case_type in user_case_totals_df.index:
                     user_percentage = user_case_totals_df.loc[case_type, 'Estimated Cases'] / user_total_cases
@@ -423,7 +431,6 @@ if countries and sum(trip_counts) > 0:
                             risk_multiple = user_percentage / global_percentage
                             all_higher_risks.append({'case_type': case_type, 'risk_multiple': risk_multiple})
                 
-                # Sort and get the top 3
                 sorted_risks = sorted(all_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
                 higher_risk_messages = sorted_risks[:3]
 
@@ -441,8 +448,8 @@ if countries and sum(trip_counts) > 0:
                     st.markdown(
                         f"""
                         <div class="risk-card">
-                            <p style="font-weight: bold; margin: 0;">{risk['case_type']} cases</p>
-                            <p style="margin: 0;">are <span style="color:#D4002C;">**{risk['risk_multiple']:.1f}x higher**</span> than the global average.</p>
+                            <p class="risk-card-title">{risk['case_type']} cases</p>
+                            <p class="risk-card-text">are <span style="color:#D4002C;font-weight:bold;">{risk['risk_multiple']:.1f}x higher</span> than the global average.</p>
                         </div>
                         """, unsafe_allow_html=True
                     )
