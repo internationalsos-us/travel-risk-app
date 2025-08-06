@@ -83,7 +83,7 @@ st.write("")
 # -------------------------
 st.markdown('<h1 style="color:#232762;">Welcome to the International SOS Travel Risk Simulation Tool</h1>', unsafe_allow_html=True)
 st.write("""
-This tool provides a simulation of potential medical and security assistance cases based on your traveler volumes.
+This tool provides a simulation of potential medical and security assistance cases based on your travel volumes.
 It uses International SOS proprietary data collected from millions of cases globally.
 """)
 
