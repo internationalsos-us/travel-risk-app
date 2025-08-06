@@ -213,7 +213,6 @@ It uses International SOS proprietary data collected from millions of cases glob
 st.write("")
 st.write("")
 
-# Add an anchor for the "Enter Trip Volumes" section
 st.markdown('<div id="enter-trip-volumes"></div>', unsafe_allow_html=True)
 # -------------------------
 # Input Section
@@ -296,8 +295,12 @@ if countries and sum(trip_counts) > 0:
 
         col1, col2 = st.columns([1,2])
         with col1:
-            st.metric("Total Trips", f"{total_trips:,}")
-            st.metric("Total Estimated Cases", f"{total_cases:.2f}")
+            # Pluralization check for "trips"
+            trip_word = "trip" if total_trips <= 1 else "trips"
+            st.metric(f"Total {trip_word}", f"{total_trips:,}")
+            # Pluralization check for "cases"
+            case_word = "case" if total_cases < 2 else "cases"
+            st.metric(f"Total Estimated {case_word}", f"{total_cases:.2f}")
             st.info("Probabilities are based on the likelihood of assistance cases **per trip**.")
         with col2:
             fig = px.bar(results_df, x="Country", y="Total Cases",
@@ -434,11 +437,14 @@ if countries and sum(trip_counts) > 0:
         user_case_totals_df = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().to_frame(name="Estimated Cases")
         user_case_totals_df.index = user_case_totals_df.index.str.replace(" Case Probability", "")
 
+        # Prepare for pluralization and dynamic content
+        trip_word = "trip" if total_trips <= 1 else "trips"
+        case_word = "case" if total_cases < 2 else "cases"
         countries_list_str = ', '.join(f'**{c}**' for c in countries)
 
         if total_cases < 1:
             st.write(f"""
-            Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
+            Your simulation of **{total_trips:,} {trip_word}** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
             """)
             st.write("")
             st.markdown("""
@@ -446,7 +452,7 @@ if countries and sum(trip_counts) > 0:
             - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
             - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
             - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
-            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
+            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international **guidelines** like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         else:
             st.markdown("""
@@ -539,7 +545,7 @@ if countries and sum(trip_counts) > 0:
             - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
             - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
             - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
-            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
+            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international **guidelines** like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         
         st.write("")
