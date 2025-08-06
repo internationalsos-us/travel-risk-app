@@ -1,12 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import matplotlib.pyplot as plt
-from io import BytesIO
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.utils import ImageReader
-import requests
 
 # -------------------------
 # Load Data
@@ -96,8 +90,8 @@ It uses International SOS proprietary data collected from millions of cases glob
 # -------------------------
 # Input Section
 # -------------------------
-st.markdown('<h2 style="color:#2f4696;">Step 1: Enter Traveler Data</h2>', unsafe_allow_html=True)
-st.write("Select countries and input traveler volumes. Add more countries if needed.")
+st.markdown('<h2 style="color:#2f4696;">Enter Trips Data</h2>', unsafe_allow_html=True)
+st.write("Select countries and input trip numbers. Add more countries if needed.")
 
 countries, traveler_counts = [], []
 country_options = sorted(data["Country"].dropna().unique())
@@ -116,7 +110,7 @@ for i in range(1, st.session_state.num_rows + 1):
         countries.append(country)
         traveler_counts.append(travelers)
 
-# Place Add/Remove buttons under the last input field
+# Add/Remove buttons under the last input field
 col_add, col_remove = st.columns([1,1])
 with col_add:
     if st.button("➕ Add Another Country"):
@@ -152,7 +146,7 @@ if countries:
         total_trips = results_df["Travelers"].sum()
         total_cases = results_df["Total Cases"].sum()
 
-        st.markdown('<h2 style="color:#2f4696;">Step 2: Estimated Assistance Needs</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 style="color:#2f4696;">Estimated Assistance Needs</h2>', unsafe_allow_html=True)
 
         col1, col2 = st.columns([1,2])
         with col1:
@@ -170,33 +164,36 @@ with values already converted into decimals (e.g., 0.74% = 0.0074).
                         color_discrete_sequence=["#2f4696", "#232762", "#4a69bd"])
             st.plotly_chart(fig, use_container_width=True)
 
-# Toggle between overall and by-country case breakdown
-st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
-view_option = st.radio("View case type breakdown by:", ["Overall", "By Country"], horizontal=True)
+        # Toggle between overall and by-country case breakdown
+        st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
+        view_option = st.radio("View case type breakdown by:", ["Overall", "By Country"], horizontal=True)
 
-if view_option == "Overall":
-    case_totals = results_df.drop(columns=["Country", "Travelers", "Total Cases"]).sum().reset_index()
-    case_totals.columns = ["Case Type", "Estimated Cases"]
-else:
-    selected_country = st.selectbox("Select a country", results_df["Country"].unique())
-    country_data = results_df[results_df["Country"] == selected_country].drop(
-        columns=["Country", "Travelers", "Total Cases"]
-    ).T.reset_index()
-    country_data.columns = ["Case Type", "Estimated Cases"]
-    country_data["Estimated Cases"] = pd.to_numeric(country_data["Estimated Cases"], errors="coerce")
-    case_totals = country_data
+        if view_option == "Overall":
+            case_totals = results_df.drop(columns=["Country", "Travelers", "Total Cases"]).sum().reset_index()
+            case_totals.columns = ["Case Type", "Estimated Cases"]
+        else:
+            selected_country = st.selectbox("Select a country", results_df["Country"].unique())
+            country_data = results_df[results_df["Country"] == selected_country].drop(
+                columns=["Country", "Travelers", "Total Cases"]
+            ).T.reset_index()
+            country_data.columns = ["Case Type", "Estimated Cases"]
+            country_data["Estimated Cases"] = pd.to_numeric(country_data["Estimated Cases"], errors="coerce")
+            case_totals = country_data
 
-fig2 = px.pie(
-    case_totals,
-    values="Estimated Cases",
-    names="Case Type",
-    color_discrete_sequence=[
-        "#2f4696", "#009354", "#FFD744", "#DD2484",
-        "#6988C0", "#6C206B", "#EF820F", "#D4002C", "#EEEFEF"
-    ]
-)
-fig2.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
-st.plotly_chart(fig2, use_container_width=True)
+        # Sort descending by estimated cases
+        case_totals = case_totals.sort_values(by="Estimated Cases", ascending=False)
+
+        fig2 = px.pie(
+            case_totals,
+            values="Estimated Cases",
+            names="Case Type",
+            color_discrete_sequence=[
+                "#2f4696", "#009354", "#FFD744", "#DD2484",
+                "#6988C0", "#6C206B", "#EF820F", "#D4002C", "#EEEFEF"
+            ]
+        )
+        fig2.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
+        st.plotly_chart(fig2, use_container_width=True)
 
         # Recommendations Section
         st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
