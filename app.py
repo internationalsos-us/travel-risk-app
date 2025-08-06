@@ -223,6 +223,7 @@ if countries and sum(trip_counts) > 0:
         st.markdown('---')
         st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
         st.write("")
+        st.write("") # Extra space added here
 
         col_user, col_bench = st.columns(2)
 
@@ -266,7 +267,7 @@ if countries and sum(trip_counts) > 0:
             # --- Button Logic for Toggling ---
             col_btn1, col_btn2 = st.columns(2)
             
-            # Set the new mode based on button clicks
+            # Use buttons to set the state
             if col_btn1.button("Global Average", key="global_btn_click", use_container_width=True):
                 st.session_state.benchmark_mode = "Global Average"
             if col_btn2.button("Regional Average", key="regional_btn_click", use_container_width=True):
@@ -335,7 +336,7 @@ if countries and sum(trip_counts) > 0:
         st.write("")
         
         # -------------------------
-        # Recommendations Section (moved up)
+        # Recommendations Section
         # -------------------------
         st.markdown('---')
         st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
@@ -353,7 +354,7 @@ International SOS can help you:
         st.write("")
 
         # -------------------------
-        # Risk Outlook section (moved down)
+        # Risk Outlook section
         # -------------------------
         st.markdown('---')
         st.markdown("""
