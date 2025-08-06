@@ -535,8 +535,7 @@ if countries and sum(trip_counts) > 0:
                     yaxis=dict(showgrid=False, automargin=True, font=dict(family='Arial, sans-serif', weight='bold')),
                     showlegend=False,
                     width=None,
-                    height=300,
-                    font=dict(family='Arial, sans-serif')
+                    height=300
                 )
                 
                 st.plotly_chart(fig, use_container_width=True)
