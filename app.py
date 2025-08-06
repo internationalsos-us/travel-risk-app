@@ -213,6 +213,7 @@ It uses International SOS proprietary data collected from millions of cases glob
 st.write("")
 st.write("")
 
+# Add an anchor for the "Enter Trip Volumes" section
 st.markdown('<div id="enter-trip-volumes"></div>', unsafe_allow_html=True)
 # -------------------------
 # Input Section
@@ -295,12 +296,8 @@ if countries and sum(trip_counts) > 0:
 
         col1, col2 = st.columns([1,2])
         with col1:
-            # Pluralization check for "trips"
-            trip_word = "trip" if total_trips <= 1 else "trips"
-            st.metric(f"Total {trip_word}", f"{total_trips:,}")
-            # Pluralization check for "cases"
-            case_word = "case" if total_cases < 2 and total_cases >= 0 else "cases"
-            st.metric(f"Total Estimated {case_word}", f"{total_cases:.2f}")
+            st.metric("Total Trips", f"{total_trips:,}")
+            st.metric("Total Estimated Cases", f"{total_cases:.2f}")
             st.info("Probabilities are based on the likelihood of assistance cases **per trip**.")
         with col2:
             fig = px.bar(results_df, x="Country", y="Total Cases",
@@ -399,7 +396,7 @@ if countries and sum(trip_counts) > 0:
             )
             fig_user.update_traces(textinfo="label+percent", textposition="outside",
                                    marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)))
-            fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.3, x=0.5, xanchor="center"),
+            fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_user, use_container_width=True)
 
@@ -414,7 +411,7 @@ if countries and sum(trip_counts) > 0:
             )
             fig_bench.update_traces(textinfo="label+percent", textposition="outside",
                                     marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)))
-            fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.3, x=0.5, xanchor="center"),
+            fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
                                     margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_bench, use_container_width=True)
             
@@ -437,14 +434,11 @@ if countries and sum(trip_counts) > 0:
         user_case_totals_df = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().to_frame(name="Estimated Cases")
         user_case_totals_df.index = user_case_totals_df.index.str.replace(" Case Probability", "")
 
-        # Prepare for pluralization and dynamic content
-        trip_word = "trip" if total_trips <= 1 else "trips"
-        case_word = "case" if total_cases < 2 and total_cases >= 0 else "cases"
         countries_list_str = ', '.join(f'**{c}**' for c in countries)
 
         if total_cases < 1:
             st.write(f"""
-            Your simulation of **{total_trips:,} {trip_word}** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
+            Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
             """)
             st.write("")
             st.markdown("""
@@ -452,12 +446,16 @@ if countries and sum(trip_counts) > 0:
             - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
             - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
             - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
-            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international **guidelines** like **ISO 31030**, ensuring your program is both effective and compliant.
+            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         else:
-            st.write(f"""
-            Your simulation of **{total_trips:,} {trip_word}** to **{countries_list_str}** has identified an estimated **{total_cases:.2f} {case_word}**. Here is a breakdown of your estimated case types, with a comparison to the global average.
-            """)
+            st.markdown("""
+            <div class="risk-alert-box">
+                <p class="risk-alert-title">
+                    <span class="alert-icon-circle">🚨</span> Higher Risk Alert: Your exposure is higher than the global average in the following areas:
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
             st.write("")
             
             higher_risk_messages = []
@@ -481,14 +479,6 @@ if countries and sum(trip_counts) > 0:
                 higher_risk_messages = sorted_risks[:3]
 
             if higher_risk_messages:
-                st.markdown("""
-                <div class="risk-alert-box">
-                    <p class="risk-alert-title">
-                        <span class="alert-icon-circle">🚨</span> Higher Risk Alert: Your exposure is higher than the global average in the following areas:
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-                
                 # Prepare a DataFrame for the horizontal bar chart
                 chart_data = pd.DataFrame(higher_risk_messages)
                 chart_data['risk_multiple'] = chart_data['risk_multiple'].round(1)
@@ -519,22 +509,24 @@ if countries and sum(trip_counts) > 0:
                     marker_color='#D4002C',
                     text=[f"{val:.1f}x higher" for val in chart_data['risk_multiple']],
                     textposition='outside',
-                    textfont=dict(color='#D4002C', size=14)
+                    textfont=dict(color='#D4002C', size=14, family='Arial, sans-serif')
                 ))
 
                 fig.update_layout(
                     barmode='stack',
                     title='Your Higher Risk Areas vs. Global Average',
                     title_x=0, # Left align title
+                    font_color="black",
                     xaxis_title=None,
                     yaxis_title=None,
                     plot_bgcolor='rgba(0,0,0,0)',
                     paper_bgcolor='rgba(0,0,0,0)',
                     xaxis=dict(showgrid=False, range=[0, chart_data['risk_multiple'].max() * 1.1]),
-                    yaxis=dict(showgrid=False, automargin=True, font=dict(family='Arial, sans-serif', weight='bold')),
+                    yaxis=dict(showgrid=False, automargin=True),
                     showlegend=False,
                     width=None,
-                    height=300
+                    height=300,
+                    font=dict(family='Arial, sans-serif')
                 )
                 
                 st.plotly_chart(fig, use_container_width=True)
@@ -547,7 +539,7 @@ if countries and sum(trip_counts) > 0:
             - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
             - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
             - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
-            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international **guidelines** like **ISO 31030**, ensuring your program is both effective and compliant.
+            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         
         st.write("")
@@ -570,7 +562,7 @@ if countries and sum(trip_counts) > 0:
             <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
             <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
                 <div style="flex:1; min-width:300px; text-align:center;">
-                    <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=1b9b43d76cc94fc09d199cbe40e277a6"
+                    <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
                          alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
                 </div>
                 <div style="flex:1; min-width:300px;">
