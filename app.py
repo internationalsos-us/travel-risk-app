@@ -58,6 +58,18 @@ st.set_page_config(page_title="International SOS | Assistance & Travel Risks", l
 # -------------------------
 st.markdown("""
 <style>
+/* Global font settings */
+html, body, [data-testid="stText"], [data-testid="stMarkdownContainer"] {
+    font-family: Arial, sans-serif;
+}
+h1 {
+    font-family: "Arial Black", Gadget, sans-serif;
+}
+h2, strong, b {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+}
+/* General container styles */
 .banner-container {
     display: flex;
     justify-content: space-between;
@@ -461,7 +473,7 @@ if countries and sum(trip_counts) > 0:
                     marker_color='#D4002C',
                     text=[f"{val:.1f}x higher" for val in chart_data['risk_multiple']],
                     textposition='outside',
-                    textfont=dict(color='#D4002C', size=14)
+                    textfont=dict(color='#D4002C', size=14, family='Arial, sans-serif')
                 ))
 
                 fig.update_layout(
@@ -474,10 +486,11 @@ if countries and sum(trip_counts) > 0:
                     plot_bgcolor='rgba(0,0,0,0)',
                     paper_bgcolor='rgba(0,0,0,0)',
                     xaxis=dict(showgrid=False, range=[0, chart_data['risk_multiple'].max() * 1.1]),
-                    yaxis=dict(showgrid=False),
+                    yaxis=dict(showgrid=False, automargin=True),
                     showlegend=False,
                     width=None,
-                    height=300
+                    height=300,
+                    font=dict(family='Arial, sans-serif')
                 )
                 
                 st.plotly_chart(fig, use_container_width=True)
