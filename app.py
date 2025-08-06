@@ -82,15 +82,16 @@ st.markdown("""
 .toggle-bar {
     display: flex;
     justify-content: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 .toggle-btn {
-    padding: 6px 14px;
+    padding: 8px 18px;
     border-radius: 20px;
     border: none;
     cursor: pointer;
     margin: 0 5px;
     font-weight: bold;
+    font-size: 14px;
 }
 .toggle-selected {
     background-color: #2f4696;
@@ -245,19 +246,29 @@ if countries:
             fig_user.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
             st.plotly_chart(fig_user, use_container_width=True)
 
-        # Benchmark Pie Chart with Toggle Buttons
+        # Benchmark Pie Chart with Styled Toggle
         with col_bench:
             if "benchmark_mode" not in st.session_state:
                 st.session_state.benchmark_mode = "Global Average"
 
             st.markdown('<div class="toggle-bar">', unsafe_allow_html=True)
+
             col_btn1, col_btn2 = st.columns([1,1])
             with col_btn1:
-                if st.button("Global Average", key="global_btn"):
+                if st.button(
+                    "Global Average",
+                    key="global_btn",
+                    help="Compare against the global average"
+                ):
                     st.session_state.benchmark_mode = "Global Average"
             with col_btn2:
-                if st.button("Regional Average", key="regional_btn"):
+                if st.button(
+                    "Regional Average",
+                    key="regional_btn",
+                    help="Compare against a regional average"
+                ):
                     st.session_state.benchmark_mode = "Regional Average"
+
             st.markdown('</div>', unsafe_allow_html=True)
 
             if st.session_state.benchmark_mode == "Global Average":
@@ -319,6 +330,4 @@ International SOS can help you:
 # Footer
 st.markdown("""
 <div style="text-align:center; font-size:12px; color:gray; margin-top:20px;">
-© 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.
-</div>
-""", unsafe_allow_html=True)
+© 2
