@@ -54,7 +54,7 @@ case_type_services = {
 st.set_page_config(page_title="International SOS | Assistance & Travel Risks", layout="wide")
 
 # -------------------------
-# Banner with Logo and Custom CSS
+# Banner with new image and layout
 # -------------------------
 st.markdown("""
 <style>
@@ -69,46 +69,83 @@ h2, strong, b {
     font-family: Arial, sans-serif;
     font-weight: bold;
 }
-/* General container styles */
-.banner-container {
+/* Banner with image background and overlay */
+.main-banner {
+    position: relative;
+    height: 350px;
+    width: 100%;
+    background-image: url('https://cdn1.internationalsos.com/-/jssmedia/images/mobility-and-travel/female-traveller-checking-assistance-app-desktop/assistance-app-homepage-carousel.jpg?w=2000&h=auto&mw=2000&rev=1b9b43d76cc94fc09d199cbe40e277a6');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.3));
+    z-index: 1;
+}
+.banner-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+}
+.top-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    background-color: #232762;
-    padding: 20px;
+    padding: 0 10px;
+    margin-bottom: 20px;
 }
-.banner-title {
-    color: white !important;
-    margin: 0;
-    flex: 1;
-    min-width: 250px;
+.logo-and-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.banner-logo-img {
+    height: 60px;
+    max-width: 100%;
+}
+.banner-h1 {
+    font-family: "Arial Black", Gadget, sans-serif;
     font-size: 28px;
-    order: 1;
-    text-align: left;
+    margin: 0;
+    color: white;
 }
-.banner-logo {
-    flex: 0;
-    min-width: 200px;
-    margin-left: 20px;
-    order: 2;
+.banner-nav {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
-@media (max-width: 768px) {
-    .banner-container {
-        flex-direction: column;
-        text-align: center;
-    }
-    .banner-logo {
-        order: 0;
-        margin: 0 0 15px 0;
-    }
-    .banner-title {
-        order: 1;
-        font-size: 22px;
-        text-align: center;
-        color: white !important;
-    }
+.banner-nav-link a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
 }
+.banner-nav-link a:hover {
+    color: #FFD744;
+}
+.header-intro-text {
+    font-size: 36px;
+    font-weight: bold;
+    max-width: 50%;
+    margin-top: 50px;
+}
+/* General app styles */
 .toggle-btn {
     padding: 8px 18px;
     border-radius: 20px;
@@ -157,14 +194,25 @@ h2, strong, b {
 }
 </style>
 
-<div class="banner-container">
-    <div class="banner-logo">
-        <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png"
-             alt="International SOS" style="height:60px; max-width:100%;">
+<div class="main-banner">
+    <div class="banner-overlay"></div>
+    <div class="banner-content">
+        <div class="top-header">
+            <div class="logo-and-title">
+                <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png"
+                     alt="International SOS" class="banner-logo-img">
+            </div>
+            <ul class="banner-nav">
+                <li class="banner-nav-link"><a href="#enter-trip-volumes">Enter Trip Volumes</a></li>
+                <li class="banner-nav-link"><a href="#estimated-needs">Estimated Needs</a></li>
+                <li class="banner-nav-link"><a href="#case-breakdown">Case Breakdown</a></li>
+                <li class="banner-nav-link"><a href="#what-it-means">What It Means</a></li>
+                <li class="banner-nav-link"><a href="#risk-outlook">Risk Outlook</a></li>
+                <li class="banner-nav-link"><a href="#get-in-touch">Get in Touch</a></li>
+            </ul>
+        </div>
+        <h1 class="banner-h1">Assistance and Travel Risks Simulation Report</h1>
     </div>
-    <h1 class="banner-title">
-        Assistance and Travel Risks Simulation Report
-    </h1>
 </div>
 """, unsafe_allow_html=True)
 
@@ -182,6 +230,8 @@ It uses International SOS proprietary data collected from millions of cases glob
 st.write("")
 st.write("")
 
+# Add an anchor for the "Enter Trip Volumes" section
+st.markdown('<div id="enter-trip-volumes"></div>', unsafe_allow_html=True)
 # -------------------------
 # Input Section
 # -------------------------
@@ -257,6 +307,8 @@ if countries and sum(trip_counts) > 0:
         total_cases = results_df["Total Cases"].sum()
 
         st.markdown('---')
+        # Add an anchor for the "Your Estimated Assistance Needs" section
+        st.markdown('<div id="estimated-needs"></div>', unsafe_allow_html=True)
         st.markdown('<h2 style="color:#2f4696;">Your Estimated Assistance Needs</h2>', unsafe_allow_html=True)
         st.write("")
 
@@ -276,10 +328,12 @@ if countries and sum(trip_counts) > 0:
         st.write("")
         st.write("")
 
+        st.markdown('---')
+        # Add an anchor for the "Your Case Type Breakdown" section
+        st.markdown('<div id="case-breakdown"></div>', unsafe_allow_html=True)
         # -------------------------
         # Case Type Breakdown
         # -------------------------
-        st.markdown('---')
         col_controls_left, col_controls_right = st.columns(2)
         with col_controls_left:
             st.markdown('<h2 style="color:#2f4696;">Your Case Type Breakdown</h2>', unsafe_allow_html=True)
@@ -383,10 +437,12 @@ if countries and sum(trip_counts) > 0:
         st.write("")
         st.write("")
         
+        st.markdown('---')
+        # Add an anchor for the "What These Results Mean for You" section
+        st.markdown('<div id="what-it-means"></div>', unsafe_allow_html=True)
         # -------------------------
         # Recommendations Section
         # -------------------------
-        st.markdown('---')
         st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
         st.write("")
 
@@ -410,7 +466,7 @@ if countries and sum(trip_counts) > 0:
             - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
             - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
             - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
-            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
+            - **Building a resilient program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         else:
             st.markdown("""
@@ -516,10 +572,12 @@ if countries and sum(trip_counts) > 0:
         st.write("")
         st.write("")
 
+        st.markdown('---')
+        # Add an anchor for the "Explore the Risk Outlook 2025 Report" section
+        st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html=True)
         # -------------------------
         # Risk Outlook section
         # -------------------------
-        st.markdown('---')
         st.markdown("""
         <div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
             <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
@@ -548,6 +606,7 @@ if countries and sum(trip_counts) > 0:
 st.markdown('---')
 st.write("")
 
+st.markdown('<div id="get-in-touch"></div>', unsafe_allow_html=True)
 # -------------------------
 # Get in Touch Section
 # -------------------------
