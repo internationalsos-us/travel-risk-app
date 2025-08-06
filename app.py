@@ -223,7 +223,7 @@ if countries and sum(trip_counts) > 0:
         st.markdown('---')
         st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
         st.write("")
-        st.write("") # Extra space added here
+        st.write("")
 
         col_user, col_bench = st.columns(2)
 
@@ -261,10 +261,10 @@ if countries and sum(trip_counts) > 0:
 
         # Benchmark Pie Chart with Styled Toggle
         with col_bench:
+            st.markdown('**Benchmark against:**')
             if "benchmark_mode" not in st.session_state:
                 st.session_state.benchmark_mode = "Global Average"
             
-            # --- Button Logic for Toggling ---
             col_btn1, col_btn2 = st.columns(2)
             
             # Use buttons to set the state
@@ -289,10 +289,7 @@ if countries and sum(trip_counts) > 0:
                 }}
             </style>
             """, unsafe_allow_html=True)
-            # --- End Button Logic ---
             
-            st.write("") # Add some space below buttons
-
             if st.session_state.benchmark_mode == "Global Average":
                 case_totals_bench = data[case_columns].mean().reset_index()
                 case_totals_bench.columns = ["Case Type", "Benchmark Cases"]
