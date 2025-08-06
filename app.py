@@ -91,7 +91,7 @@ It uses International SOS proprietary data collected from millions of cases glob
 # Input Section
 # -------------------------
 st.markdown('<h2 style="color:#2f4696;">Enter Trips Data</h2>', unsafe_allow_html=True)
-st.write("Select countries and input trip numbers. Add more countries if needed.")
+st.write("Select countries and input yearly trip numbers for each destination. Add more countries if needed.")
 
 countries, traveler_counts = [], []
 country_options = sorted(data["Country"].dropna().unique())
@@ -104,7 +104,7 @@ for i in range(1, st.session_state.num_rows + 1):
     with col1:
         country = st.selectbox(f"Destination Country {i}", [""] + list(country_options), key=f"country{i}")
     with col2:
-        travelers = st.number_input(f"Yearly trips for {country or f'Country {i}'}",
+        travelers = st.number_input(f"Yearly trips to {country or f'Country {i}'}",
                                     min_value=0, value=0, step=1, key=f"trav{i}")
     if country:
         countries.append(country)
@@ -153,8 +153,7 @@ if countries:
             st.metric("Total Travelers", f"{total_trips:,}")
             st.metric("Total Estimated Cases", f"{total_cases:.2f}")
             st.info("""
-Probabilities are based on the likelihood of assistance cases **per traveler**, 
-with values already converted into decimals (e.g., 0.74% = 0.0074).  
+Probabilities are based on the likelihood of assistance cases **per traveler**.  
 """)
         with col2:
             fig = px.bar(results_df, x="Country", y="Total Cases", 
