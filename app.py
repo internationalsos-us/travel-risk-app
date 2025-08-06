@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
+import numpy as np
 
 # -------------------------
 # Load Data
@@ -113,11 +115,17 @@ st.markdown("""
     color: black;
 }
 .risk-alert-box {
-    background-color: #ffe6e6; /* Light red background */
+    background-color: #D4002C; /* Corporate red background */
     border-left: 5px solid #EF820F; /* Orange border on the left */
     padding: 20px;
     margin: 20px 0;
     border-radius: 5px;
+}
+.risk-alert-title {
+    font-weight: bold;
+    color: white;
+    font-size: 18px;
+    margin: 0;
 }
 </style>
 
@@ -377,9 +385,13 @@ if countries and sum(trip_counts) > 0:
             - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         else:
-            st.write(f"""
-            Your simulation of **{total_trips:,} trips** to **{countries_list_str}** has identified several key risks. Here is a breakdown of your estimated case types, with a comparison to the global average.
-            """)
+            st.markdown("""
+            <div class="risk-alert-box">
+                <p class="risk-alert-title">
+                🚨 Higher Risk Alert: Your exposure is higher than the global average in the following areas:
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
             st.write("")
             
             higher_risk_messages = []
@@ -403,45 +415,54 @@ if countries and sum(trip_counts) > 0:
                 higher_risk_messages = sorted_risks[:3]
 
             if higher_risk_messages:
-                st.markdown("""
-                <div class="risk-alert-box">
-                    <p style="font-weight: bold; color:#EF820F; font-size:18px; margin: 0;">
-                    🚨 Higher Risk Alert: Your exposure is higher in the following areas:
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-                
                 # Prepare a DataFrame for the horizontal bar chart
                 chart_data = pd.DataFrame(higher_risk_messages)
                 chart_data['risk_multiple'] = chart_data['risk_multiple'].round(1)
                 
+                # Create base and excess risk columns for stacked bars
+                chart_data['risk_base'] = np.minimum(chart_data['risk_multiple'], 1.0)
+                chart_data['risk_excess'] = np.maximum(0, chart_data['risk_multiple'] - 1.0)
+
                 # Sort data for the chart
                 chart_data = chart_data.sort_values('risk_multiple', ascending=True)
-                
-                fig = px.bar(
-                    chart_data,
-                    x='risk_multiple',
-                    y='case_type',
+
+                fig = go.Figure()
+
+                fig.add_trace(go.Bar(
+                    x=chart_data['risk_base'],
+                    y=chart_data['case_type'],
+                    name='Global Average',
                     orientation='h',
-                    title='Your Higher Risk Areas vs. Global Average',
-                    color_discrete_sequence=["#EF820F"],
-                    labels={'risk_multiple': 'Risk Multiplier (x)', 'case_type': ''}
-                )
-                
+                    marker_color='#2f4696',
+                    hoverinfo='none'
+                ))
+
+                fig.add_trace(go.Bar(
+                    x=chart_data['risk_excess'],
+                    y=chart_data['case_type'],
+                    name='Higher Risk',
+                    orientation='h',
+                    marker_color='#D4002C',
+                    text=[f"{val:.1f}x higher" for val in chart_data['risk_multiple']],
+                    textposition='outside',
+                    textfont=dict(color='#D4002C', size=14)
+                ))
+
                 fig.update_layout(
+                    barmode='stack',
+                    title='Your Higher Risk Areas vs. Global Average',
                     title_x=0.5,
                     font_color="black",
                     xaxis_title=None,
                     yaxis_title=None,
                     plot_bgcolor='white',
                     paper_bgcolor='white',
-                    xaxis=dict(showgrid=False),
+                    xaxis=dict(showgrid=False, range=[0, chart_data['risk_multiple'].max() * 1.1]),
                     yaxis=dict(showgrid=False),
                     showlegend=False,
                     width=None,
                     height=300
                 )
-                fig.update_traces(texttemplate='%{x:.1f}x higher', textposition='outside')
                 
                 st.plotly_chart(fig, use_container_width=True)
 
