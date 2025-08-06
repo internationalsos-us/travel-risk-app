@@ -213,78 +213,102 @@ with values already converted into decimals (e.g., 0.74% = 0.0074).
                         color_discrete_sequence=["#2f4696", "#232762", "#4a69bd"])
             st.plotly_chart(fig, use_container_width=True)
 
-        # -------------------------
-        # Case Type Breakdown Side-by-Side
-        # -------------------------
-        st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
+# -------------------------
+# Case Type Breakdown Side-by-Side
+# -------------------------
+st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
 
-        if "benchmark_mode" not in st.session_state:
+col_user, col_bench = st.columns(2)
+
+# User Pie Chart
+with col_user:
+    st.markdown("#### My Selected Countries")
+    filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
+    if filter_country == "All":
+        case_totals_user = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().reset_index()
+        case_totals_user.columns = ["Case Type", "Estimated Cases"]
+    else:
+        country_data = results_df[results_df["Country"] == filter_country].drop(
+            columns=["Country", "Trips", "Total Cases"]
+        ).T.reset_index()
+        country_data.columns = ["Case Type", "Estimated Cases"]
+        case_totals_user = country_data
+
+    case_totals_user = case_totals_user.sort_values(by="Estimated Cases", ascending=False)
+    fig_user = px.pie(
+        case_totals_user,
+        values="Estimated Cases",
+        names="Case Type",
+        color="Case Type",
+        color_discrete_map=case_type_colors
+    )
+    fig_user.update_traces(textinfo="percent+label")
+    fig_user.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
+    st.plotly_chart(fig_user, use_container_width=True)
+
+# Benchmark Pie Chart
+with col_bench:
+    # Toggle buttons above right chart only
+    st.markdown("""
+        <div class="toggle-bar">
+            <style>
+            .toggle-btn {
+                padding: 6px 14px;
+                border-radius: 20px;
+                border: none;
+                cursor: pointer;
+                margin-right: 8px;
+                font-weight: bold;
+            }
+            .selected {
+                background-color: #2f4696;
+                color: white;
+            }
+            .unselected {
+                background-color: #cccccc;
+                color: black;
+            }
+            </style>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col_btn1, col_btn2 = st.columns([1,1])
+    with col_btn1:
+        if st.button("Global Average", key="global_btn"):
             st.session_state.benchmark_mode = "Global Average"
+    with col_btn2:
+        if st.button("Regional Average", key="regional_btn"):
+            st.session_state.benchmark_mode = "Regional Average"
 
-        # Toggle buttons above left chart
-        col_toggle1, col_toggle2 = st.columns([1,1])
-        with col_toggle1:
-            if st.button(
-                "Global Average",
-                key="global_btn",
-                help="Compare against the global average",
-            ):
-                st.session_state.benchmark_mode = "Global Average"
-        with col_toggle2:
-            if st.button(
-                "Regional Average",
-                key="regional_btn",
-                help="Compare against a regional average",
-            ):
-                st.session_state.benchmark_mode = "Regional Average"
+    if "benchmark_mode" not in st.session_state:
+        st.session_state.benchmark_mode = "Global Average"
 
-        col_user, col_bench = st.columns(2)
+    if st.session_state.benchmark_mode == "Global Average":
+        st.markdown("#### Global Average")
+        global_avg = data[case_columns].mean()
+        case_totals_bench = global_avg.reset_index()
+        case_totals_bench.columns = ["Case Type", "Estimated Cases"]
+        case_totals_bench["Estimated Cases"] = case_totals_bench["Estimated Cases"] * total_trips
+    else:
+        st.markdown("#### Regional Average")
+        available_regions = sorted(data["Region"].dropna().unique())
+        selected_region = st.selectbox("Select a region", available_regions, key="region_select")
+        region_avg = data[data["Region"] == selected_region][case_columns].mean()
+        case_totals_bench = region_avg.reset_index()
+        case_totals_bench.columns = ["Case Type", "Estimated Cases"]
+        case_totals_bench["Estimated Cases"] = case_totals_bench["Estimated Cases"] * total_trips
 
-        # User Pie Chart
-        with col_user:
-            st.markdown("#### My Selected Countries")
-            filter_country = st.selectbox("Filter to one country (optional)", ["All"] + list(results_df["Country"]))
-            if filter_country == "All":
-                case_totals_user = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().reset_index()
-                case_totals_user.columns = ["Case Type", "Estimated Cases"]
-            else:
-                country_data = results_df[results_df["Country"] == filter_country].drop(
-                    columns=["Country", "Trips", "Total Cases"]
-                ).T.reset_index()
-                country_data.columns = ["Case Type", "Estimated Cases"]
-                case_totals_user = country_data
-            case_totals_user = case_totals_user.sort_values(by="Estimated Cases", ascending=False)
-            colors_user = [case_type_colors.get(c, "#cccccc") for c in case_totals_user["Case Type"]]
-
-            fig_user = px.pie(case_totals_user, values="Estimated Cases", names="Case Type")
-            fig_user.update_traces(marker=dict(colors=colors_user), textinfo="percent+label")
-            fig_user.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
-            st.plotly_chart(fig_user, use_container_width=True)
-
-        # Benchmark Pie Chart
-        with col_bench:
-            if st.session_state.benchmark_mode == "Global Average":
-                st.markdown("#### Global Average")
-                global_avg = data[case_columns].mean()
-                case_totals_bench = global_avg.reset_index()
-                case_totals_bench.columns = ["Case Type", "Estimated Cases"]
-                case_totals_bench["Estimated Cases"] = case_totals_bench["Estimated Cases"] * total_trips
-            else:
-                st.markdown("#### Regional Average")
-                available_regions = sorted(data["Region"].dropna().unique())
-                selected_region = st.selectbox("Select a region", available_regions)
-                region_avg = data[data["Region"] == selected_region][case_columns].mean()
-                case_totals_bench = region_avg.reset_index()
-                case_totals_bench.columns = ["Case Type", "Estimated Cases"]
-                case_totals_bench["Estimated Cases"] = case_totals_bench["Estimated Cases"] * total_trips
-
-            case_totals_bench = case_totals_bench.sort_values(by="Estimated Cases", ascending=False)
-            colors_bench = [case_type_colors.get(c, "#cccccc") for c in case_totals_bench["Case Type"]]
-
-            fig_bench = px.pie(case_totals_bench, values="Estimated Cases", names="Case Type")
-            fig_bench.update_traces(marker=dict(colors=colors_bench), textinfo="percent+label")
-            fig_bench.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
-            st.plotly_chart(fig_bench, use_container_width=True)
+    case_totals_bench = case_totals_bench.sort_values(by="Estimated Cases", ascending=False)
+    fig_bench = px.pie(
+        case_totals_bench,
+        values="Estimated Cases",
+        names="Case Type",
+        color="Case Type",
+        color_discrete_map=case_type_colors
+    )
+    fig_bench.update_traces(textinfo="percent+label")
+    fig_bench.update_layout(legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"))
+    st.plotly_chart(fig_bench, use_container_width=True)
 
         # Recommendations Section
         st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
