@@ -178,11 +178,16 @@ with values already converted into decimals (e.g., 0.74% = 0.0074).
             case_totals = results_df.drop(columns=["Country", "Travelers", "Total Cases"]).sum().reset_index()
             case_totals.columns = ["Case Type", "Estimated Cases"]
         else:
-            selected_country = st.selectbox("Select a country", results_df["Country"].unique())
-            case_totals = results_df[results_df["Country"] == selected_country].drop(
-                columns=["Country", "Travelers", "Total Cases"]).T.reset_index()
-            case_totals.columns = ["Case Type", "Estimated Cases"]
-            case_totals = case_totals[1:]  # remove header row
+selected_country = st.selectbox("Select a country", results_df["Country"].unique())
+country_data = results_df[results_df["Country"] == selected_country].drop(
+    columns=["Country", "Travelers", "Total Cases"]
+).T.reset_index()
+country_data.columns = ["Case Type", "Estimated Cases"]
+
+# Convert values to numeric
+country_data["Estimated Cases"] = pd.to_numeric(country_data["Estimated Cases"], errors="coerce")
+
+case_totals = country_data
 
         fig2 = px.pie(case_totals, values="Estimated Cases", names="Case Type",
                       color_discrete_sequence=["#2f4696", "#009354", "#FFD744", "#DD2484", "#6988C0", "#6C206B", "#EF820F", "#D4002C", "#EEEFEF"])
