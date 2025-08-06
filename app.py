@@ -31,6 +31,22 @@ case_type_colors = {
 }
 
 # -------------------------
+# Mapping of Case Types to Services
+# -------------------------
+case_type_services = {
+    "Medical Information & Analysis": "**Quantum** digital platform for proactive risk intelligence and **Medical Consulting** for expert advice.",
+    "Medical Out-Patient": "**Medical Consulting** and our extensive **Provider Network** for immediate access to care.",
+    "Medical In-Patient": "Our **TeleConsultation** services, combined with expert **in-patient case management**.",
+    "Medical Evacs, Repats, & RMR": "Dedicated **Medical Evacuation** and **Repatriation** teams with full **Case Management**.",
+    "Security Evacs, Repats, & RMR": "Specialized **Security Evacuation** and **Repatriation** with our **Security Consulting**.",
+    "Security Information & Analysis": "**Quantum** for real-time threat intelligence and expert **Security Consulting**.",
+    "Security Referral": "Our global **Provider Network** and **Security Consulting** for reliable local support.",
+    "Security Interventional Assistance": "Immediate on-the-ground support with **Security Consulting** and **On-the-Ground Response**.",
+    "Security Evacuation": "Critical **Security Evacuation** and **Repatriation** services to ensure safe transport.",
+    "Travel Information & Analysis": "**Quantum** and our **Risk Ratings** to help you stay ahead of potential travel disruptions."
+}
+
+# -------------------------
 # Page Config
 # -------------------------
 st.set_page_config(page_title="International SOS | Assistance & Travel Risks", layout="wide")
@@ -95,6 +111,13 @@ st.markdown("""
 .toggle-unselected {
     background-color: #cccccc;
     color: black;
+}
+.risk-alert-box {
+    background-color: #ffe6e6; /* Light red background */
+    border-left: 5px solid #D4002C; /* Red border on the left */
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 5px;
 }
 </style>
 
@@ -335,13 +358,9 @@ if countries and sum(trip_counts) > 0:
         global_avg_prob = data[case_columns].mean()
         global_benchmark_cases_df = (global_avg_prob * total_trips).to_frame(name="Benchmark Cases")
         global_benchmark_cases_df.index = global_benchmark_cases_df.index.str.replace(" Case Probability", "")
-        global_benchmark_cases_df = global_benchmark_cases_df.sort_values(by="Benchmark Cases", ascending=False)
         
-        # Get top 3 cases for the user's simulation
         user_case_totals_df = results_df.drop(columns=["Country", "Trips", "Total Cases"]).sum().to_frame(name="Estimated Cases")
         user_case_totals_df.index = user_case_totals_df.index.str.replace(" Case Probability", "")
-        user_case_totals_df = user_case_totals_df.sort_values(by="Estimated Cases", ascending=False)
-        user_top_3_cases = user_case_totals_df.head(3)
 
         countries_list_str = ', '.join(f'**{c}**' for c in countries)
 
@@ -359,37 +378,53 @@ if countries and sum(trip_counts) > 0:
             - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         else:
-            # Dynamic intro and detailed risk comparison
+            # Dynamic intro and detailed risk comparison for all cases with higher risk
             st.write(f"""
-            Your simulation of **{total_trips:,} trips** to **{countries_list_str}** has identified several key risks. Here is a breakdown of your top 3 estimated case types, with a comparison to the global average.
+            Your simulation of **{total_trips:,} trips** to **{countries_list_str}** has identified several key risks. Here is a breakdown of your estimated case types, with a comparison to the global average.
             """)
             st.write("")
             
             # Build the list of higher-risk case types
             higher_risk_messages = []
-            for case_type, user_cases in user_top_3_cases.iterrows():
-                user_percentage = user_cases['Estimated Cases'] / total_cases
-                
-                # Check if the case type exists in the global benchmark
-                if case_type in global_benchmark_cases_df.index:
-                    global_cases = global_benchmark_cases_df.loc[case_type, 'Benchmark Cases']
-                    global_percentage = global_cases / global_benchmark_cases_df.sum().iloc[0]
+            
+            # Calculate total cases for both user and global to get percentages
+            user_total_cases = user_case_totals_df['Estimated Cases'].sum()
+            global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
+            
+            if user_total_cases > 0 and global_total_cases > 0:
+                for case_type in user_case_totals_df.index:
+                    user_percentage = user_case_totals_df.loc[case_type, 'Estimated Cases'] / user_total_cases
                     
-                    if user_percentage > global_percentage:
-                        higher_risk_messages.append(f"**- {case_type}** cases are **{user_percentage/global_percentage:.1f}x higher** than the global average.")
-
+                    if case_type in global_benchmark_cases_df.index:
+                        global_percentage = global_benchmark_cases_df.loc[case_type, 'Benchmark Cases'] / global_total_cases
+                        
+                        if user_percentage > global_percentage:
+                            risk_multiple = user_percentage / global_percentage
+                            
+                            # Get the suggested service for the case type
+                            service_suggestion = case_type_services.get(case_type, "Our comprehensive solutions can help.")
+                            
+                            # Build the markdown string
+                            higher_risk_messages.append(
+                                f"<p style='margin-bottom: 5px;'>➡️ Your exposure to **{case_type}** cases is **{risk_multiple:.1f}x higher** than the global average. </p>"
+                                f"<p style='font-size: 14px; margin-left: 20px;'>💡 **Solution:** {service_suggestion}</p>"
+                            )
+            
             if higher_risk_messages:
-                st.markdown(f"""
-                <p style="font-weight: bold; color:#D4002C; font-size:18px;">
+                st.markdown("""
+                <div class="risk-alert-box">
+                <p style="font-weight: bold; color:#D4002C; font-size:18px; margin: 0;">
                 🚨 Higher Risk Alert: You have a higher exposure to the following risks:
                 </p>
+                </div>
                 """, unsafe_allow_html=True)
                 for msg in higher_risk_messages:
-                    st.markdown(msg)
+                    st.markdown(msg, unsafe_allow_html=True)
                 st.write("")
             else:
                 st.info("Your top case types are not disproportionately higher than the global average, but proactive management is still essential.")
             
+            # The general recommendations section remains the same
             st.markdown("""
             Based on these insights, International SOS can help you:
             - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
