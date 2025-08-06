@@ -225,7 +225,7 @@ if countries and sum(trip_counts) > 0:
         with col_title_left:
             st.markdown('<h2 style="color:#2f4696;">Case Type Breakdown</h2>', unsafe_allow_html=True)
         with col_title_right:
-            st.markdown('<h2 style="color:#2f4696;">Benchmark against:</h2>', unsafe_allow_html=True)
+            st.markdown('<span style="font-weight: bold; color: #2f4696;">Benchmark against:</span>', unsafe_allow_html=True)
         st.write("")
 
         col_user, col_bench = st.columns(2)
