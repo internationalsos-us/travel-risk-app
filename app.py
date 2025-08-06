@@ -114,7 +114,7 @@ h2, strong, b {
     gap: 15px;
 }
 .banner-logo-img {
-    height: 60px;
+    height: 80px; /* Increased logo size */
     max-width: 100%;
 }
 .banner-h1 {
@@ -123,6 +123,12 @@ h2, strong, b {
     margin: 0;
     color: white;
     max-width: 30%; /* Restrict text width to 30% */
+}
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+    .banner-h1 {
+        max-width: 100%; /* Full width on mobile */
+    }
 }
 .banner-nav {
     display: none; /* Remove menu */
@@ -175,9 +181,8 @@ h2, strong, b {
     background-color: transparent !important;
 }
 /* New CSS rule for the page body to create margins */
-div[data-testid="stAppViewBlockContainer"] {
-    max-width: 70%;
-    margin: auto;
+main {
+    padding: 0 15%;
 }
 </style>
 
