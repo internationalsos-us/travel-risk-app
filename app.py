@@ -584,8 +584,8 @@ if countries and sum(trip_counts) > 0:
         
         # Display breakdown for top 3 risks
         if higher_risk_messages:
-            st.markdown('<h4 style="color:#2f4696;">Potential Cost for a Single Case in Top Risk Areas</h4>', unsafe_allow_html=True)
-            st.write("Below is the highest potential cost for a single case of each of your top risk areas, based on the countries you selected.")
+            st.markdown('<h4 style="color:#2f4696;">Potential Cost for a Single Case in your Top Risk Areas</h4>', unsafe_allow_html=True)
+            st.write("Below is the average potential cost we are seeing for a single case of each of your top risk areas, based on the countries you selected.")
             
             for risk in higher_risk_messages:
                 case_type = risk['case_type']
