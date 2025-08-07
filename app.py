@@ -143,6 +143,12 @@ body {
 .banner-nav {
     display: none; /* Remove menu */
 }
+/* New container to hold main app content */
+.content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
 /* General app styles */
 .toggle-btn {
     padding: 8px 18px;
@@ -190,10 +196,6 @@ body {
 .stPlotlyChart {
     background-color: transparent !important;
 }
-/* New CSS rule for the page body to create margins */
-main {
-    padding: 0 15%;
-}
 /* New card-like styling for sections */
 .card-style {
     background-color: #ffffff;
@@ -238,9 +240,13 @@ main {
 </div>
 """, unsafe_allow_html=True)
 
+st.write("")
+st.write("")
 
-st.write("")
-st.write("")
+# -------------------------
+# Main content container
+# -------------------------
+st.markdown('<div class="content-container">', unsafe_allow_html=True)
 
 # -------------------------
 # Intro Section
@@ -263,9 +269,7 @@ st.markdown('<div id="enter-trip-volumes"></div>', unsafe_allow_html=True)
 st.markdown('<h2 style="color:#2f4696;">Enter Trip Volumes</h2>', unsafe_allow_html=True)
 st.write("Select countries and input estimated annual trip volumes. Add more countries if needed.")
 st.write("")
-st.markdown('<div class="card-style-no-padding">', unsafe_allow_html=True)
-st.markdown('<div style="padding: 2rem;">', unsafe_allow_html=True)
-
+st.markdown('<div class="card-style">', unsafe_allow_html=True)
 countries, trip_counts = [], []
 country_options = sorted(data["Country"].dropna().unique())
 
@@ -295,7 +299,8 @@ with col_remove:
         st.rerun()
 
 st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+st.write("")
+st.write("")
 
 # -------------------------
 # Region Mapping
@@ -499,7 +504,8 @@ if countries and sum(trip_counts) > 0:
         # -------------------------
         st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
         st.write("")
-
+        st.markdown('<div class="card-style">', unsafe_allow_html=True)
+        
         # Calculate global benchmark for comparison
         global_avg_prob = data[case_columns].mean()
         global_benchmark_cases_df = (global_avg_prob * total_trips).to_frame(name="Benchmark Cases")
@@ -521,7 +527,6 @@ if countries and sum(trip_counts) > 0:
             global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
 
         if total_cases < 1:
-            st.markdown('<div class="card-style">', unsafe_allow_html=True)
             st.write(f"""
             Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
             """)
@@ -532,7 +537,6 @@ if countries and sum(trip_counts) > 0:
             - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
             - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
-
             # New button and text
             st.write("")
             st.markdown(f"""
@@ -547,8 +551,6 @@ if countries and sum(trip_counts) > 0:
                 <p style="font-size:14px; color:#555; margin-top:10px;">Let's discuss your results with an International SOS People Risk Expert.</p>
             </div>
             """, unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-
         else:
             if user_total_cases > 0 and global_total_cases > 0:
                 all_higher_risks = []
@@ -562,17 +564,7 @@ if countries and sum(trip_counts) > 0:
                             risk_multiple = user_percentage / global_percentage
                             all_higher_risks.append({'case_type': case_type, 'risk_multiple': risk_multiple})
                 
-                # Filter out the case types that should not be displayed in the cost section
-                excluded_types = [
-                    "Travel Information & Analysis",
-                    "Security Referral",
-                    "Security Information & Analysis",
-                    "Medical Information & Analysis"
-                ]
-                
-                filtered_higher_risks = [risk for risk in all_higher_risks if risk['case_type'] not in excluded_types]
-                
-                sorted_risks = sorted(filtered_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
+                sorted_risks = sorted(all_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
                 higher_risk_messages = sorted_risks[:3]
             else:
                 higher_risk_messages = []
@@ -753,9 +745,6 @@ if countries and sum(trip_counts) > 0:
         - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
         - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
         """)
-
-        # New button and text
-        st.write("")
         st.write("")
         st.markdown(f"""
         <div style="text-align:center;">
@@ -769,40 +758,41 @@ if countries and sum(trip_counts) > 0:
             <p style="font-size:14px; color:#555; margin-top:10px;">Let's discuss your results with an International SOS People Risk Expert.</p>
         </div>
         """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.write("")
-    st.write("")
-    
-    st.markdown('---')
-    st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html=True)
-    # -------------------------
-    # Risk Outlook section
-    # -------------------------
-    st.markdown("""
-    <div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
-        <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
-        <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
-            <div style="flex:1; min-width:300px; text-align:center;">
-                <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
-                        alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
-            </div>
-            <div style="flex:1; min-width:300px;">
-                <p style="font-size:16px; line-height:1.6; color:#333;">
-                    The <b>Risk Outlook 2025</b> is our flagship annual study, providing actionable insights into the key medical and security
-                    challenges facing organizations worldwide. Developed with expert analysis and global data, it helps leaders prepare
-                    for the unexpected and safeguard their workforce.
-                </p>
-                <p style="text-align:left; margin-top:20px;">
-                    <a href="https://www.internationalsos.com/risk-outlook?utm_source=riskreport" target="_blank"
-                        style="background-color:#2f4696; color:white; font-weight:bold;
-                                 padding:12px 24px; text-decoration:none; border-radius:8px;">
-                            📘 Access the Risk Outlook 2025 Report
-                    </a>
-                </p>
-            </div>
+st.write("")
+st.write("")
+
+st.markdown('---')
+st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html=True)
+# -------------------------
+# Risk Outlook section
+# -------------------------
+st.markdown("""
+<div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
+    <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
+    <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:300px; text-align:center;">
+            <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
+                    alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
+        </div>
+        <div style="flex:1; min-width:300px;">
+            <p style="font-size:16px; line-height:1.6; color:#333;">
+                The <b>Risk Outlook 2025</b> is our flagship annual study, providing actionable insights into the key medical and security
+                challenges facing organizations worldwide. Developed with expert analysis and global data, it helps leaders prepare
+                for the unexpected and safeguard their workforce.
+            </p>
+            <p style="text-align:left; margin-top:20px;">
+                <a href="https://www.internationalsos.com/risk-outlook?utm_source=riskreport" target="_blank"
+                    style="background-color:#2f4696; color:white; font-weight:bold;
+                             padding:12px 24px; text-decoration:none; border-radius:8px;">
+                        📘 Access the Risk Outlook 2025 Report
+                </a>
+            </p>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 st.markdown('---')
 st.write("")
 
