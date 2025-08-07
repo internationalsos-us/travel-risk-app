@@ -465,6 +465,9 @@ if countries and sum(trip_counts) > 0:
         user_case_totals_df.index = user_case_totals_df.index.str.replace(" Case Probability", "")
 
         countries_list_str = ', '.join(f'**{c}**' for c in countries)
+        
+        # Initialize higher_risk_messages as an empty list to prevent the NameError
+        higher_risk_messages = []
 
         if total_cases < 1:
             st.write(f"""
@@ -480,11 +483,6 @@ if countries and sum(trip_counts) > 0:
             </div>
             """, unsafe_allow_html=True)
             st.write("")
-            
-            higher_risk_messages = []
-            
-            user_total_cases = user_case_totals_df['Estimated Cases'].sum()
-            global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
             
             if user_total_cases > 0 and global_total_cases > 0:
                 all_higher_risks = []
