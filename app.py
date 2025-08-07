@@ -503,17 +503,7 @@ if countries and sum(trip_counts) > 0:
                             risk_multiple = user_percentage / global_percentage
                             all_higher_risks.append({'case_type': case_type, 'risk_multiple': risk_multiple})
                 
-                # Filter out the case types that should not be displayed in the cost section
-                excluded_types = [
-                    "Travel Information & Analysis",
-                    "Security Referral",
-                    "Security Information & Analysis",
-                    "Medical Information & Analysis"
-                ]
-                
-                filtered_higher_risks = [risk for risk in all_higher_risks if risk['case_type'] not in excluded_types]
-                
-                sorted_risks = sorted(filtered_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
+                sorted_risks = sorted(all_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
                 higher_risk_messages = sorted_risks[:3]
 
             if higher_risk_messages:
@@ -589,19 +579,64 @@ if countries and sum(trip_counts) > 0:
             "Security Information & Analysis": "Security Information & Analysis Average Case Cost",
             "Security Referral": "Security Referral Average Case Cost",
             "Security Interventional Assistance": "Security Interventional Assistance Average Case Cost",
+            "Security Evacuation": "Security Evacuation Average Case Cost",
             "Travel Information & Analysis": "Travel Information & Analysis Average Case Cost"
         }
+
+        # List of excluded case types for the cost breakdown section
+        excluded_types_for_cost = [
+            "Travel Information & Analysis",
+            "Security Referral",
+            "Security Information & Analysis",
+            "Medical Information & Analysis"
+        ]
+
+        # Get all higher risk areas
+        all_higher_risks_full_list = []
+        if user_total_cases > 0 and global_total_cases > 0:
+            for case_type in user_case_totals_df.index:
+                user_percentage = user_case_totals_df.loc[case_type, 'Estimated Cases'] / user_total_cases
+                if case_type in global_benchmark_cases_df.index:
+                    global_percentage = global_benchmark_cases_df.loc[case_type, 'Benchmark Cases'] / global_total_cases
+                    if user_percentage > global_percentage:
+                        all_higher_risks_full_list.append(case_type)
         
-        # Display breakdown for top 3 risks
-        if higher_risk_messages:
+        # Now, construct the list of case types to display in the cost section
+        displayed_cost_risks = []
+        
+        # 1. Prioritize top 3 higher risks that are not excluded
+        for risk in all_higher_risks_full_list:
+            if risk not in excluded_types_for_cost and len(displayed_cost_risks) < 3:
+                displayed_cost_risks.append(risk)
+
+        # 2. If there are fewer than 3, fill the remaining slots with the highest cost items
+        if len(displayed_cost_risks) < 3:
+            all_potential_cost_items = []
+            
+            # Find the highest average cost for each non-excluded case type among selected countries
+            for case_type_display in case_type_to_cost_col.keys():
+                if case_type_display not in excluded_types_for_cost:
+                    cost_col_name = case_type_to_cost_col.get(case_type_display)
+                    country_costs_for_type = cost_data[cost_data['Country'].isin(countries)][cost_col_name].dropna()
+                    
+                    if not country_costs_for_type.empty:
+                        max_cost = country_costs_for_type.max()
+                        all_potential_cost_items.append({'case_type': case_type_display, 'cost': max_cost})
+
+            # Sort by cost descending
+            all_potential_cost_items.sort(key=lambda x: x['cost'], reverse=True)
+            
+            # Add to the display list, avoiding duplicates
+            for item in all_potential_cost_items:
+                if item['case_type'] not in displayed_cost_risks and len(displayed_cost_risks) < 3:
+                    displayed_cost_risks.append(item['case_type'])
+
+        # Display breakdown for the selected cost areas
+        if displayed_cost_risks:
             st.markdown('<h4 style="color:#2f4696;">Potential Cost for a Single Case in your Top Risk Areas</h4>', unsafe_allow_html=True)
             st.write("Below is the average potential cost we are seeing for a single case of each of your top risk areas, based on the countries you selected.")
             
-            # The case types to display are the ones in higher_risk_messages
-            display_case_types = [risk['case_type'] for risk in higher_risk_messages]
-            
-            
-            for case_type in display_case_types:
+            for case_type in displayed_cost_risks:
                 cost_col_name = case_type_to_cost_col.get(case_type)
                 
                 if cost_col_name and not cost_data.empty:
