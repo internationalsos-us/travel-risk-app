@@ -503,7 +503,17 @@ if countries and sum(trip_counts) > 0:
                             risk_multiple = user_percentage / global_percentage
                             all_higher_risks.append({'case_type': case_type, 'risk_multiple': risk_multiple})
                 
-                sorted_risks = sorted(all_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
+                # Filter out the case types that should not be displayed in the cost section
+                excluded_types = [
+                    "Travel Information & Analysis",
+                    "Security Referral",
+                    "Security Information & Analysis",
+                    "Medical Information & Analysis"
+                ]
+                
+                filtered_higher_risks = [risk for risk in all_higher_risks if risk['case_type'] not in excluded_types]
+                
+                sorted_risks = sorted(filtered_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
                 higher_risk_messages = sorted_risks[:3]
 
             if higher_risk_messages:
@@ -590,17 +600,8 @@ if countries and sum(trip_counts) > 0:
             # The case types to display are the ones in higher_risk_messages
             display_case_types = [risk['case_type'] for risk in higher_risk_messages]
             
-            # Filter out the case types that should not be displayed
-            filtered_display_types = [
-                ct for ct in display_case_types if ct not in [
-                    "Travel Information & Analysis",
-                    "Security Referral",
-                    "Security Information & Analysis",
-                    "Medical Information & Analysis"
-                ]
-            ]
             
-            for case_type in filtered_display_types:
+            for case_type in display_case_types:
                 cost_col_name = case_type_to_cost_col.get(case_type)
                 
                 if cost_col_name and not cost_data.empty:
