@@ -9,11 +9,17 @@ import numpy as np
 # -------------------------
 @st.cache_data
 def load_data():
+    # Load the main trips and cases data
     df = pd.read_excel("Trip and cases report 2023-2025.xlsx", sheet_name="Trips and Cases")
     df = df.rename(columns={"Country Name": "Country", "International Trips": "Trips"})
-    return df
 
-data = load_data()
+    # Load the average cost data from the new file
+    cost_df = pd.read_excel("Cases_Cost_Combined_Average by Type.xlsx", sheet_name="Sheet1")
+    cost_df = cost_df.rename(columns={"CountryName": "Country"})
+
+    return df, cost_df
+
+data, cost_data = load_data()
 case_columns = [col for col in data.columns if "Probability" in col]
 
 # -------------------------
@@ -30,22 +36,6 @@ case_type_colors = {
     "Security Interventional Assistance": "#D4002C",
     "Security Evacuation": "#EEEFEF",
     "Travel Information & Analysis": "#232762"
-}
-
-# -------------------------
-# Mapping of Case Types to Services
-# -------------------------
-case_type_services = {
-    "Medical Information & Analysis": "Quantum digital platform for proactive risk intelligence and Medical Consulting for expert advice.",
-    "Medical Out-Patient": "Medical Consulting and our extensive Provider Network for immediate access to care.",
-    "Medical In-Patient": "Our TeleConsultation services, combined with expert in-patient case management.",
-    "Medical Evacs, Repats, & RMR": "Dedicated Medical Evacuation and Repatriation teams with full Case Management.",
-    "Security Evacs, Repats, & RMR": "Specialized Security Evacuation and Repatriation with our Security Consulting.",
-    "Security Information & Analysis": "Quantum for real-time threat intelligence and expert Security Consulting.",
-    "Security Referral": "Our global Provider Network and Security Consulting for reliable local support.",
-    "Security Interventional Assistance": "Immediate on-the-ground support with Security Consulting and On-the-Ground Response.",
-    "Security Evacuation": "Critical Security Evacuation and Repatriation services to ensure safe transport.",
-    "Travel Information & Analysis": "Quantum and our Risk Ratings to help you stay ahead of potential travel disruptions."
 }
 
 # -------------------------
@@ -402,10 +392,10 @@ if countries and sum(trip_counts) > 0:
             case_totals_user = case_totals_user.set_index('Case Type').reindex(case_type_colors.keys()).reset_index()
             case_totals_user = case_totals_user.dropna(subset=['Estimated Cases'])
 
-            # Create custom hover text
+            # Create custom hover text with line breaks
             case_totals_user['hover_text'] = case_totals_user.apply(
-                lambda row: f"<b>Case Type:</b> {row['Case Type']}<br>" +
-                            f"<span style='white-space:normal; width:150px;'>{case_type_descriptions.get(row['Case Type'], '')}</span><br>" +
+                lambda row: f"<b>Case Type:</b> {row['Case Type']}<br><br>" +
+                            f"{case_type_descriptions.get(row['Case Type'], '')}<br><br>" +
                             f"<b>Estimated Cases:</b> {row['Estimated Cases']:.2f}",
                 axis=1
             )
@@ -421,7 +411,9 @@ if countries and sum(trip_counts) > 0:
             fig_user.update_traces(textinfo="label+percent", textposition="outside",
                                    marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)),
                                    hovertemplate="%{customdata}<extra></extra>",
-                                   customdata=case_totals_user['hover_text'])
+                                   customdata=case_totals_user['hover_text'],
+                                   hoverlabel=dict(namelength=-1, # Ensure the full label is shown
+                                                   font=dict(size=12)))
             fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_user, use_container_width=True)
@@ -429,8 +421,8 @@ if countries and sum(trip_counts) > 0:
         with col_bench_chart:
             # Create custom hover text for benchmark chart
             case_totals_bench['hover_text'] = case_totals_bench.apply(
-                lambda row: f"<b>Case Type:</b> {row['Case Type']}<br>" +
-                            f"<span style='white-space:normal; width:150px;'>{case_type_descriptions.get(row['Case Type'], '')}</span><br>" +
+                lambda row: f"<b>Case Type:</b> {row['Case Type']}<br><br>" +
+                            f"{case_type_descriptions.get(row['Case Type'], '')}<br><br>" +
                             f"<b>Benchmark Cases:</b> {row['Benchmark Cases']:.2f}",
                 axis=1
             )
@@ -446,7 +438,9 @@ if countries and sum(trip_counts) > 0:
             fig_bench.update_traces(textinfo="label+percent", textposition="outside",
                                     marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)),
                                     hovertemplate="%{customdata}<extra></extra>",
-                                    customdata=case_totals_bench['hover_text'])
+                                    customdata=case_totals_bench['hover_text'],
+                                    hoverlabel=dict(namelength=-1,
+                                                    font=dict(size=12)))
             fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
                                     margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_bench, use_container_width=True)
@@ -477,13 +471,6 @@ if countries and sum(trip_counts) > 0:
             Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
             """)
             st.write("")
-            st.markdown("""
-            This is where International SOS can still provide immense value:
-            - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
-            - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
-            - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
-            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
-            """)
         else:
             st.markdown("""
             <div class="risk-alert-box">
@@ -569,48 +556,113 @@ if countries and sum(trip_counts) > 0:
 
             else:
                 st.info("Your top case types are not disproportionately higher than the global average, but proactive management is still essential.")
-            
-            st.markdown("""
-            Based on these insights, International SOS can help you:
-            - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
-            - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
-            - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
-            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
-            """)
         
         st.write("")
-        st.write("")
 
-        st.markdown('---')
-        st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html=True)
         # -------------------------
-        # Risk Outlook section
+        # Estimated Cost Breakdown (New Section)
         # -------------------------
+        st.markdown('<h3 style="color:#2f4696;">Estimated Cost Breakdown</h3>', unsafe_allow_html=True)
+        
+        # Personalized introduction
+        if higher_risk_messages:
+            top_risks_str = ', '.join([f"**{r['case_type']}**" for r in higher_risk_messages])
+            st.write(f"Based on your simulation of **{total_trips:,} trips** to **{countries_list_str}**, your highest-risk areas are {top_risks_str}. Below is a breakdown of the estimated costs associated with these and other case types.")
+        else:
+            st.write(f"Below is a breakdown of the estimated costs for all potential case types based on your simulation of **{total_trips:,} trips** to **{countries_list_str}**.")
+
+        # Prepare a DataFrame for costs
+        cost_breakdown_df = pd.DataFrame(columns=["Case Type", "Estimated Cases", "Average Cost", "Total Estimated Cost"])
+        all_case_types = list(case_type_colors.keys())
+
+        for case_type in all_case_types:
+            # Match the column names between the two dataframes
+            cost_col_name = f"{case_type} Average Case Cost"
+            
+            # Check if the case type exists in the estimated cases
+            if case_type in user_case_totals_df.index:
+                estimated_cases = user_case_totals_df.loc[case_type, 'Estimated Cases']
+                
+                # Calculate the weighted average cost for the selected countries
+                country_costs = cost_data[cost_data['Country'].isin(countries)]
+                country_trips = results_df[results_df['Country'].isin(countries)]
+                
+                if not country_costs.empty and not country_trips.empty:
+                    # Merge dataframes to get costs and trips for the same countries
+                    merged_df = pd.merge(country_costs, country_trips, on='Country')
+                    
+                    if cost_col_name in merged_df.columns:
+                        total_cost_per_country = merged_df[cost_col_name] * merged_df[case_type]
+                        total_estimated_cost = total_cost_per_country.sum()
+                        
+                        # Calculate the average cost based on the countries' contributions
+                        if estimated_cases > 0:
+                            weighted_avg_cost = total_estimated_cost / estimated_cases
+                        else:
+                            weighted_avg_cost = 0
+                        
+                        cost_breakdown_df.loc[len(cost_breakdown_df)] = [
+                            case_type,
+                            f"{estimated_cases:.2f}",
+                            f"${weighted_avg_cost:,.2f}",
+                            f"${total_estimated_cost:,.2f}"
+                        ]
+        
+        # Add a total row
+        total_estimated_costs = cost_breakdown_df['Total Estimated Cost'].str.replace('[\$,]', '', regex=True).astype(float).sum()
+        total_estimated_cases = cost_breakdown_df['Estimated Cases'].astype(float).sum()
+
+        cost_breakdown_df.loc[len(cost_breakdown_df)] = [
+            '**TOTAL**', 
+            f"**{total_estimated_cases:.2f}**",
+            '', 
+            f"**${total_estimated_costs:,.2f}**"
+        ]
+
+        st.dataframe(cost_breakdown_df, hide_index=True)
+
+        st.write("")
         st.markdown("""
-        <div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
-            <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
-            <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
-                <div style="flex:1; min-width:300px; text-align:center;">
-                    <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
-                            alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
-                </div>
-                <div style="flex:1; min-width:300px;">
-                    <p style="font-size:16px; line-height:1.6; color:#333;">
-                        The <b>Risk Outlook 2025</b> is our flagship annual study, providing actionable insights into the key medical and security
-                        challenges facing organizations worldwide. Developed with expert analysis and global data, it helps leaders prepare
-                        for the unexpected and safeguard their workforce.
-                    </p>
-                    <p style="text-align:left; margin-top:20px;">
-                        <a href="https://www.internationalsos.com/risk-outlook?utm_source=riskreport" target="_blank"
-                            style="background-color:#2f4696; color:white; font-weight:bold;
-                                     padding:12px 24px; text-decoration:none; border-radius:8px;">
-                                📘 Access the Risk Outlook 2025 Report
-                        </a>
-                    </p>
-                </div>
+        Based on these insights, International SOS can help you:
+        - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
+        - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
+        - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
+        - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
+        """)
+    
+    st.write("")
+    st.write("")
+    
+    st.markdown('---')
+    st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html=True)
+    # -------------------------
+    # Risk Outlook section
+    # -------------------------
+    st.markdown("""
+    <div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
+        <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
+        <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:300px; text-align:center;">
+                <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
+                        alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
+            </div>
+            <div style="flex:1; min-width:300px;">
+                <p style="font-size:16px; line-height:1.6; color:#333;">
+                    The <b>Risk Outlook 2025</b> is our flagship annual study, providing actionable insights into the key medical and security
+                    challenges facing organizations worldwide. Developed with expert analysis and global data, it helps leaders prepare
+                    for the unexpected and safeguard their workforce.
+                </p>
+                <p style="text-align:left; margin-top:20px;">
+                    <a href="https://www.internationalsos.com/risk-outlook?utm_source=riskreport" target="_blank"
+                        style="background-color:#2f4696; color:white; font-weight:bold;
+                                 padding:12px 24px; text-decoration:none; border-radius:8px;">
+                            📘 Access the Risk Outlook 2025 Report
+                    </a>
+                </p>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 st.markdown('---')
 st.write("")
 
