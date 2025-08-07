@@ -504,7 +504,6 @@ if countries and sum(trip_counts) > 0:
         # -------------------------
         st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
         st.write("")
-        st.markdown('<div class="card-style">', unsafe_allow_html=True)
         
         # Calculate global benchmark for comparison
         global_avg_prob = data[case_columns].mean()
@@ -527,6 +526,7 @@ if countries and sum(trip_counts) > 0:
             global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
 
         if total_cases < 1:
+            st.markdown('<div class="card-style">', unsafe_allow_html=True)
             st.write(f"""
             Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
             """)
@@ -551,6 +551,8 @@ if countries and sum(trip_counts) > 0:
                 <p style="font-size:14px; color:#555; margin-top:10px;">Let's discuss your results with an International SOS People Risk Expert.</p>
             </div>
             """, unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
         else:
             if user_total_cases > 0 and global_total_cases > 0:
                 all_higher_risks = []
