@@ -68,10 +68,10 @@ st.markdown("""
 html, body, [data-testid="stText"], [data-testid="stMarkdownContainer"] {
     font-family: Arial, sans-serif;
 }
-h1, h2, h3, h4, h5, h6 {
+h1 {
     font-family: "Arial Black", Gadget, sans-serif;
 }
-strong, b {
+h2, strong, b {
     font-family: Arial, sans-serif;
     font-weight: bold;
 }
@@ -422,7 +422,7 @@ if countries and sum(trip_counts) > 0:
             case_totals_bench = case_totals_bench.dropna(subset=['Benchmark Cases'])
 
         # Pie Charts
-        st.markdown('<div class="card-style">', unsafe_allow_html=True)
+        st.markdown('<div class="card-style-no-padding">', unsafe_allow_html=True)
         col_user_chart, col_bench_chart = st.columns(2)
         with col_user_chart:
             if filter_country == "All":
@@ -461,8 +461,8 @@ if countries and sum(trip_counts) > 0:
                                    customdata=case_totals_user['hover_text'],
                                    hoverlabel=dict(namelength=-1, # Ensure the full label is shown
                                                    font=dict(size=12)))
-            fig_user.update_layout(showlegend=False, 
-                                   margin=dict(t=50, b=50, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
+            fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
+                                   margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
                                    plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_user, use_container_width=True)
 
@@ -489,8 +489,8 @@ if countries and sum(trip_counts) > 0:
                                     customdata=case_totals_bench['hover_text'],
                                     hoverlabel=dict(namelength=-1,
                                                     font=dict(size=12)))
-            fig_bench.update_layout(showlegend=False,
-                                    margin=dict(t=50, b=50, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
+            fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
+                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
                                     plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_bench, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -504,6 +504,7 @@ if countries and sum(trip_counts) > 0:
         # -------------------------
         st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
         st.write("")
+        st.markdown('<div class="card-style">', unsafe_allow_html=True)
         
         # Calculate global benchmark for comparison
         global_avg_prob = data[case_columns].mean()
@@ -526,10 +527,30 @@ if countries and sum(trip_counts) > 0:
             global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
 
         if total_cases < 1:
-            st.markdown('<div class="card-style">', unsafe_allow_html=True)
             st.write(f"""
             Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
             """)
+            st.markdown("""
+            Based on these insights, International SOS can help you:
+            - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
+            - **Empowering Your Travelers:** What if they had **24/7 access** to on-demand medical and security advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
+            - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
+            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
+            """)
+            # New button and text
+            st.write("")
+            st.markdown(f"""
+            <div style="text-align:center;">
+                <a href="#get-in-touch">
+                    <button style="background-color:#EF820F; color:white; font-weight:bold;
+                                    border:none; padding:15px 30px; font-size:16px; cursor:pointer;
+                                    margin-top:15px; border-radius:20px;">
+                            Talk to an expert
+                    </button>
+                </a>
+                <p style="font-size:14px; color:#555; margin-top:10px;">Let's discuss your results with an International SOS People Risk Expert.</p>
+            </div>
+            """, unsafe_allow_html=True)
         else:
             if user_total_cases > 0 and global_total_cases > 0:
                 all_higher_risks = []
@@ -715,8 +736,8 @@ if countries and sum(trip_counts) > 0:
         st.markdown('</div>', unsafe_allow_html=True)
         st.write("")
         st.write("")
-        
-        # This section is now no longer conditional
+
+
         st.markdown("""
         Based on these insights, International SOS can help you:
         - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
@@ -795,7 +816,7 @@ st.markdown(f"""
         </button>
     </a>
 </div>
-""", unsafe_allow_html_true)
+""", unsafe_allow_html=True)
 
 st.write("")
 st.write("")
@@ -805,4 +826,4 @@ st.markdown("""
 <div style="text-align:center; font-size:12px; color:gray; margin-top:20px;">
 © 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.
 </div>
-""", unsafe_allow_html_true)
+""", unsafe_allow_html=True)
