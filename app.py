@@ -582,57 +582,34 @@ if countries and sum(trip_counts) > 0:
         cost_cols_from_data = [col.replace(" Case Probability", "") for col in case_columns]
         common_case_types = list(set(case_type_to_cost_col.keys()) & set(cost_cols_from_data))
         
-        total_potential_cost = 0
-
-        for case_type_display in common_case_types:
-            cost_col_name = case_type_to_cost_col.get(case_type_display)
-            prob_col_name = f"{case_type_display} Case Probability"
-
-            estimated_costs_per_country = {}
-            for country, trips in zip(countries, trip_counts):
-                # Ensure country exists in both dataframes
-                if country in data['Country'].values and country in cost_data['Country'].values:
-                    prob = data[data['Country'] == country][prob_col_name].iloc[0]
-                    avg_cost = cost_data[cost_data['Country'] == country][cost_col_name].iloc[0]
-                    
-                    if not pd.isna(prob) and not pd.isna(avg_cost):
-                        estimated_cases = trips * prob
-                        cost_for_country = estimated_cases * avg_cost
-                        estimated_costs_per_country[country] = cost_for_country
-            
-            if estimated_costs_per_country:
-                max_cost_country = max(estimated_costs_per_country, key=estimated_costs_per_country.get)
-                max_cost_value = estimated_costs_per_country[max_cost_country]
-                total_potential_cost += max_cost_value
-                all_case_costs[case_type_display] = {
-                    'country': max_cost_country,
-                    'total_cost': max_cost_value
-                }
-        
-        st.write("")
-        st.markdown(f"**Total Estimated Cost (sum of all cases and countries):** ${total_potential_cost:,.2f}")
-        st.write("")
-        st.markdown("---")
-        
         # Display breakdown for top 3 risks
         if higher_risk_messages:
-            st.markdown('<h4 style="color:#2f4696;">Potential Cost for Top Risk Areas</h4>', unsafe_allow_html=True)
-            st.write("Below is the potential cost for the country with the highest financial exposure in each of your top risk areas.")
+            st.markdown('<h4 style="color:#2f4696;">Potential Cost for a Single Case in Top Risk Areas</h4>', unsafe_allow_html=True)
+            st.write("Below is the highest potential cost for a single case of each of your top risk areas, based on the countries you selected.")
             
             for risk in higher_risk_messages:
                 case_type = risk['case_type']
-                if case_type in all_case_costs:
-                    cost_info = all_case_costs[case_type]
-                    if cost_info['total_cost'] > 0:
+                cost_col_name = case_type_to_cost_col.get(case_type)
+                
+                if cost_col_name and not cost_data.empty:
+                    # Find the maximum average cost for this case type among selected countries
+                    country_costs_for_type = cost_data[cost_data['Country'].isin(countries)][['Country', cost_col_name]]
+                    country_costs_for_type = country_costs_for_type.dropna()
+
+                    if not country_costs_for_type.empty:
+                        max_cost_row = country_costs_for_type.loc[country_costs_for_type[cost_col_name].idxmax()]
+                        max_cost_country = max_cost_row['Country']
+                        max_cost_value = max_cost_row[cost_col_name]
+                        
                         col1, col2 = st.columns([2, 3])
                         with col1:
                             st.markdown(f"**{case_type}**")
-                            st.markdown(f"<small>Highest risk in **{cost_info['country']}**</small>", unsafe_allow_html=True)
+                            st.markdown(f"<small>Highest average cost in **{max_cost_country}**</small>", unsafe_allow_html=True)
                         with col2:
-                            st.metric("Potential Cost", f"${cost_info['total_cost']:,.2f}")
+                            st.metric("Potential Cost", f"${max_cost_value:,.2f}")
                         st.write("---") # Separator between risk areas
         else:
-            st.info("No higher risk areas were identified compared to the global average.")
+            st.info("No higher risk areas were identified compared to the global average. You can view the overall estimated cost in the table above.")
             st.write("---")
 
         st.markdown("""
