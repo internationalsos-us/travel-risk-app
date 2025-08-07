@@ -591,39 +591,34 @@ if countries and sum(trip_counts) > 0:
         cases_for_total = []
         cost_cols_from_data = [col.replace(" Case Probability", "") for col in case_columns]
 
-        for case_type in cost_data.columns:
-            if case_type in case_type_to_cost_col.values():
-                display_name = {v: k for k, v in case_type_to_cost_col.items()}[case_type]
+        # Iterate only through the case types present in both the main data and the cost data
+        common_case_types = list(set(case_type_to_cost_col.keys()) & set(cost_cols_from_data))
+        
+        for case_type_display in common_case_types:
+            cost_col_name = case_type_to_cost_col.get(case_type_display)
+            prob_col_name = f"{case_type_display} Case Probability"
+
+            estimated_cases = results_df[case_type_display].sum()
+            cases_for_total.append(estimated_cases)
+            
+            if estimated_cases > 0:
+                country_df = pd.DataFrame({'Country': countries, 'Trips': trip_counts})
+                cost_and_prob_df = pd.merge(country_df, data[['Country', prob_col_name]], on='Country')
+                cost_and_prob_df = pd.merge(cost_and_prob_df, cost_data[['Country', cost_col_name]], on='Country')
+
+                total_cost = (cost_and_prob_df['Trips'] * cost_and_prob_df[prob_col_name] * cost_and_prob_df[cost_col_name]).sum()
                 
-                if display_name in cost_cols_from_data:
-                    cost_col_name = case_type
-                    prob_col_name = f"{display_name} Case Probability"
-
-                    # Calculate the estimated cases for this case type across all selected countries
-                    # We need to sum up the cases from the original calculation.
-                    estimated_cases = results_df[display_name].sum()
-                    cases_for_total.append(estimated_cases)
-                    
-                    if estimated_cases > 0:
-                        # Create a merged DataFrame to ensure correct country-by-country multiplication
-                        country_df = pd.DataFrame({'Country': countries, 'Trips': trip_counts})
-                        cost_and_prob_df = pd.merge(country_df, data[['Country', prob_col_name]], on='Country')
-                        cost_and_prob_df = pd.merge(cost_and_prob_df, cost_data[['Country', cost_col_name]], on='Country')
-
-                        # Calculate total cost by multiplying trips * probability * average cost for each country
-                        total_cost = (cost_and_prob_df['Trips'] * cost_and_prob_df[prob_col_name] * cost_and_prob_df[cost_col_name]).sum()
-                        
-                        weighted_avg_cost = total_cost / estimated_cases
-                    else:
-                        weighted_avg_cost = 0
-                        total_cost = 0
-                        
-                    cost_breakdown_df.loc[len(cost_breakdown_df)] = [
-                        display_name,
-                        f"{estimated_cases:.2f}",
-                        f"${weighted_avg_cost:,.2f}",
-                        f"${total_cost:,.2f}"
-                    ]
+                weighted_avg_cost = total_cost / estimated_cases
+            else:
+                weighted_avg_cost = 0
+                total_cost = 0
+                
+            cost_breakdown_df.loc[len(cost_breakdown_df)] = [
+                case_type_display,
+                f"{estimated_cases:.2f}",
+                f"${weighted_avg_cost:,.2f}",
+                f"${total_cost:,.2f}"
+            ]
         
         # Add a total row
         total_estimated_costs = cost_breakdown_df['Total Estimated Cost'].str.replace('[\$,]', '', regex=True).astype(float).sum()
