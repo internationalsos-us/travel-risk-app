@@ -581,11 +581,6 @@ if countries and sum(trip_counts) > 0:
             "Security Interventional Assistance": "Security Interventional Assistance Average Case Cost",
             "Travel Information & Analysis": "Travel Information & Analysis Average Case Cost"
         }
-
-        # Calculate costs for all common case types to determine the highest cost country per type
-        all_case_costs = {}
-        cost_cols_from_data = [col.replace(" Case Probability", "") for col in case_columns]
-        common_case_types = list(set(case_type_to_cost_col.keys()) & set(cost_cols_from_data))
         
         # Display breakdown for top 3 risks
         if higher_risk_messages:
