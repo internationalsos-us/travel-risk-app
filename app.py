@@ -604,7 +604,7 @@ if countries and sum(trip_counts) > 0:
                         col1, col2 = st.columns([2, 3])
                         with col1:
                             st.markdown(f"**{case_type}**")
-                            st.markdown(f"<small>Highest average cost in **{max_cost_country}**</small>", unsafe_allow_html=True)
+                            st.markdown(f"<small>Average recorded cost in **{max_cost_country}**</small>", unsafe_allow_html=True)
                         with col2:
                             st.metric("Potential Cost", f"${max_cost_value:,.2f}")
                         st.write("---") # Separator between risk areas
