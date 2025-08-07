@@ -471,6 +471,10 @@ if countries and sum(trip_counts) > 0:
         user_total_cases = 0
         global_total_cases = 0
 
+        # Calculate user_total_cases and global_total_cases only if results_df is not empty
+        if not results_df.empty and results_df["Total Cases"].sum() > 0:
+            user_total_cases = user_case_totals_df['Estimated Cases'].sum()
+            global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
 
         if total_cases < 1:
             st.write(f"""
@@ -478,19 +482,6 @@ if countries and sum(trip_counts) > 0:
             """)
             st.write("")
         else:
-            st.markdown("""
-            <div class="risk-alert-box">
-                <p class="risk-alert-title">
-                    <span class="alert-icon-circle">🚨</span> Higher Risk Alert: Your exposure is higher than the global average in the following areas:
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-            st.write("")
-            
-            # Initialize these variables before use in the conditional statement
-            user_total_cases = user_case_totals_df['Estimated Cases'].sum()
-            global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
-
             if user_total_cases > 0 and global_total_cases > 0:
                 all_higher_risks = []
                 for case_type in user_case_totals_df.index:
@@ -515,8 +506,19 @@ if countries and sum(trip_counts) > 0:
                 
                 sorted_risks = sorted(filtered_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
                 higher_risk_messages = sorted_risks[:3]
+            else:
+                higher_risk_messages = []
+
 
             if higher_risk_messages:
+                st.markdown("""
+                <div class="risk-alert-box">
+                    <p class="risk-alert-title">
+                        <span class="alert-icon-circle">🚨</span> Higher Risk Alert: Your exposure is higher than the global average in the following areas:
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+                st.write("")
                 # Prepare a DataFrame for the horizontal bar chart
                 chart_data = pd.DataFrame(higher_risk_messages)
                 chart_data['risk_multiple'] = chart_data['risk_multiple'].round(1)
@@ -593,16 +595,60 @@ if countries and sum(trip_counts) > 0:
             "Travel Information & Analysis": "Travel Information & Analysis Average Case Cost"
         }
         
-        # Display breakdown for top 3 risks
-        if higher_risk_messages:
+        # Define the list of excluded case types for the cost breakdown section
+        excluded_types_for_cost = [
+            "Travel Information & Analysis",
+            "Security Referral",
+            "Security Information & Analysis",
+            "Medical Information & Analysis"
+        ]
+
+        # Get all higher risk areas
+        all_higher_risks_full_list = []
+        if user_total_cases > 0 and global_total_cases > 0:
+            for case_type in user_case_totals_df.index:
+                user_percentage = user_case_totals_df.loc[case_type, 'Estimated Cases'] / user_total_cases
+                if case_type in global_benchmark_cases_df.index:
+                    global_percentage = global_benchmark_cases_df.loc[case_type, 'Benchmark Cases'] / global_total_cases
+                    if user_percentage > global_percentage:
+                        all_higher_risks_full_list.append(case_type)
+        
+        # Now, construct the list of case types to display in the cost section
+        displayed_cost_risks = []
+        
+        # 1. Prioritize top 3 higher risks that are not excluded
+        for risk in all_higher_risks_full_list:
+            if risk not in excluded_types_for_cost and len(displayed_cost_risks) < 3:
+                displayed_cost_risks.append(risk)
+
+        # 2. If there are fewer than 3, fill the remaining slots with the highest cost items
+        if len(displayed_cost_risks) < 3:
+            all_potential_cost_items = []
+            
+            # Find the highest average cost for each non-excluded case type among selected countries
+            for case_type_display in case_type_to_cost_col.keys():
+                if case_type_display not in excluded_types_for_cost:
+                    cost_col_name = case_type_to_cost_col.get(case_type_display)
+                    country_costs_for_type = cost_data[cost_data['Country'].isin(countries)][cost_col_name].dropna()
+                    
+                    if not country_costs_for_type.empty:
+                        max_cost = country_costs_for_type.max()
+                        all_potential_cost_items.append({'case_type': case_type_display, 'cost': max_cost})
+
+            # Sort by cost descending
+            all_potential_cost_items.sort(key=lambda x: x['cost'], reverse=True)
+            
+            # Add to the display list, avoiding duplicates
+            for item in all_potential_cost_items:
+                if item['case_type'] not in displayed_cost_risks and len(displayed_cost_risks) < 3:
+                    displayed_cost_risks.append(item['case_type'])
+        
+        # Display breakdown for the selected cost areas
+        if displayed_cost_risks:
             st.markdown('<h4 style="color:#2f4696;">Potential Cost for a Single Case in your Top Risk Areas</h4>', unsafe_allow_html=True)
             st.write("Below is the average potential cost we are seeing for a single case of each of your top risk areas, based on the countries you selected.")
             
-            # The case types to display are the ones in higher_risk_messages
-            display_case_types = [risk['case_type'] for risk in higher_risk_messages]
-            
-            
-            for case_type in display_case_types:
+            for case_type in displayed_cost_risks:
                 cost_col_name = case_type_to_cost_col.get(case_type)
                 
                 if cost_col_name and not cost_data.empty:
@@ -623,13 +669,13 @@ if countries and sum(trip_counts) > 0:
                             st.metric("Potential Cost", f"${max_cost_value:,.2f}")
                         st.write("---") # Separator between risk areas
         else:
-            st.info("No higher risk areas were identified compared to the global average.")
+            st.info("No higher risk areas were identified compared to the global average. However, it does not mean that there is no risk associated with your country selection. All trips carry a level of risk that your organization needs to be ready to face or proactively, mitigate.")
             st.write("---")
 
         st.markdown("""
         Based on these insights, International SOS can help you:
         - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
-        - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
+        - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **247 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
         - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
         - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
         """)
