@@ -166,7 +166,7 @@ body {
     border-left: 5px solid #EF820F; /* Orange border on the left */
     padding: 20px;
     margin: 20px 0;
-    border-radius: 5px;
+    border-radius: 8px; /* Use same border-radius as cards */
 }
 .risk-alert-title {
     font-weight: bold;
@@ -251,7 +251,7 @@ st.write("""
 This tool provides a simulation of potential medical and security assistance cases based on your **trip volumes**.
 It uses International SOS proprietary data collected from millions of cases globally.
 """)
-st.write("</div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 st.write("")
 st.write("")
 
@@ -525,8 +525,30 @@ if countries and sum(trip_counts) > 0:
             st.write(f"""
             Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
             """)
-            st.write("</div>", unsafe_allow_html=True)
+            st.markdown("""
+            Based on these insights, International SOS can help you:
+            - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
+            - **Empowering Your Travelers:** What if they had **24/7 access** to on-demand medical and security advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
+            - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
+            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
+            """)
+
+            # New button and text
             st.write("")
+            st.markdown(f"""
+            <div style="text-align:center;">
+                <a href="#get-in-touch">
+                    <button style="background-color:#EF820F; color:white; font-weight:bold;
+                                    border:none; padding:15px 30px; font-size:16px; cursor:pointer;
+                                    margin-top:15px; border-radius:20px;">
+                            Talk to an expert
+                    </button>
+                </a>
+                <p style="font-size:14px; color:#555; margin-top:10px;">Let's discuss your results with an International SOS People Risk Expert.</p>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
         else:
             if user_total_cases > 0 and global_total_cases > 0:
                 all_higher_risks = []
@@ -540,7 +562,17 @@ if countries and sum(trip_counts) > 0:
                             risk_multiple = user_percentage / global_percentage
                             all_higher_risks.append({'case_type': case_type, 'risk_multiple': risk_multiple})
                 
-                sorted_risks = sorted(all_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
+                # Filter out the case types that should not be displayed in the cost section
+                excluded_types = [
+                    "Travel Information & Analysis",
+                    "Security Referral",
+                    "Security Information & Analysis",
+                    "Medical Information & Analysis"
+                ]
+                
+                filtered_higher_risks = [risk for risk in all_higher_risks if risk['case_type'] not in excluded_types]
+                
+                sorted_risks = sorted(filtered_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
                 higher_risk_messages = sorted_risks[:3]
             else:
                 higher_risk_messages = []
@@ -548,7 +580,7 @@ if countries and sum(trip_counts) > 0:
 
             if higher_risk_messages:
                 st.markdown("""
-                <div class="risk-alert-box card-style">
+                <div class="risk-alert-box">
                     <p class="risk-alert-title">
                         <span class="alert-icon-circle">🚨</span> Higher Risk Alert: Your exposure is higher than the global average in the following areas:
                     </p>
