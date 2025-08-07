@@ -591,7 +591,7 @@ if countries and sum(trip_counts) > 0:
             "Security Information & Analysis": "Security Information & Analysis Average Case Cost",
             "Security Referral": "Security Referral Average Case Cost",
             "Security Interventional Assistance": "Security Interventional Assistance Average Case Cost",
-            "Security Evacuation": "Security Evacuation Average Case Cost",
+            "Security Evacuation": "Security Evacs, Repats, & RMR Average Case Cost",
             "Travel Information & Analysis": "Travel Information & Analysis Average Case Cost"
         }
         
