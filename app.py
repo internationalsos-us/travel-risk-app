@@ -49,6 +49,22 @@ case_type_services = {
 }
 
 # -------------------------
+# Mapping of Case Types to Descriptions
+# -------------------------
+case_type_descriptions = {
+    "Medical Information & Analysis": "(i.e. Emergency and routine medical advice, First aid advice, Travel health & inoculation advice, Inflight medical advice etc.)",
+    "Medical Out-Patient": "(When the patient receives medical services for the purpose of diagnosis or treatment and is not admitted as an inpatient by the treating physician.)",
+    "Medical In-Patient": "(i.e. Arrangement of Admission, Identifying Treating Doctor for Hospitalization, Medical contacts by the Medical Team with the treating doctors during or after patient's hospitalization)",
+    "Medical Evacs, Repats, & RMR": "(Arrangement for air and/or surface transportation, medical care during transportation and communications for a patient as well as the transportation of the patient’s mortal remains)",
+    "Security Evacs, Repats, & RMR": "(Arrangement for air and/or surface transportation and communications for a patient as well as transportation of the patient’s mortal remains)",
+    "Security Information & Analysis": "(i.e. Risk assessments, Travel security advice, Country-specific threat levels, Pre-travel briefings, Intelligence on protests, crime, terrorism, political instability, or other emerging threats)",
+    "Security Referral": "(i.e. Connection to vetted security providers, Secure ground transportation, Vetted accommodation, Security escorts, Local security consultancy, Risk mitigation services through third-party partners)",
+    "Security Interventional Assistance": "(i.e. On-the-ground security guidance during an incident, Advice on shelter-in-place vs. evacuation, Emergency relocation coordination, Active threat monitoring, Coordination with local response services, Immediate support during unrest, crime, or crisis)",
+    "Security Evacuation": "(i.e. Extraction from high-risk environments, Evacuation due to conflict, terrorism, or natural disaster with security implications, Charter flight coordination, Secure ground movement out of danger zones, Coordination with embassies or insurers for evacuation)",
+    "Travel Information & Analysis": "(Any service rendered relating to travel including pre-trip.)"
+}
+
+# -------------------------
 # Page Config
 # -------------------------
 st.set_page_config(page_title="International SOS | Assistance & Travel Risks", layout="wide")
@@ -191,7 +207,7 @@ main {
     <div class="banner-content">
         <div class="top-header">
             <img src="https://images.learn.internationalsos.com/EloquaImages/clients/InternationalSOS/%7B0769a7db-dae2-4ced-add6-d1a73cb775d5%7D_International_SOS_white_hr_%281%29.png"
-                 alt="International SOS" class="banner-logo-img">
+                    alt="International SOS" class="banner-logo-img">
         </div>
         <h1 class="banner-h1">Assistance and Travel Risks Simulation Report</h1>
     </div>
@@ -234,7 +250,7 @@ for i in range(1, st.session_state.num_rows + 1):
         country = st.selectbox(f"Destination Country {i}", [""] + list(country_options), key=f"country{i}")
     with col2:
         trips = st.number_input(f"Trips for {country or f'Country {i}'}",
-                                min_value=0, value=0, step=1, key=f"trav{i}")
+                                 min_value=0, value=0, step=1, key=f"trav{i}")
     if country and trips > 0:
         countries.append(country)
         trip_counts.append(trips)
@@ -386,6 +402,15 @@ if countries and sum(trip_counts) > 0:
             case_totals_user = case_totals_user.set_index('Case Type').reindex(case_type_colors.keys()).reset_index()
             case_totals_user = case_totals_user.dropna(subset=['Estimated Cases'])
 
+            # Create custom hover text
+            case_totals_user['hover_text'] = case_totals_user.apply(
+                lambda row: f"<b>Case Type:</b> {row['Case Type']}<br>" +
+                            f"{case_type_descriptions.get(row['Case Type'], '')}<br>" +
+                            f"<b>Estimated Cases:</b> {row['Estimated Cases']:.2f}<br>" +
+                            f"<b>Percentage:</b> {row['Estimated Cases']/case_totals_user['Estimated Cases'].sum():.2%}",
+                axis=1
+            )
+
             fig_user = px.pie(
                 case_totals_user,
                 values="Estimated Cases",
@@ -395,12 +420,23 @@ if countries and sum(trip_counts) > 0:
                 title="Your Estimated Case Breakdown"
             )
             fig_user.update_traces(textinfo="label+percent", textposition="outside",
-                                   marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)))
+                                   marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)),
+                                   hovertemplate="%{customdata}<extra></extra>",
+                                   customdata=case_totals_user['hover_text'])
             fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_user, use_container_width=True)
 
         with col_bench_chart:
+            # Create custom hover text for benchmark chart
+            case_totals_bench['hover_text'] = case_totals_bench.apply(
+                lambda row: f"<b>Case Type:</b> {row['Case Type']}<br>" +
+                            f"{case_type_descriptions.get(row['Case Type'], '')}<br>" +
+                            f"<b>Benchmark Cases:</b> {row['Benchmark Cases']:.2f}<br>" +
+                            f"<b>Percentage:</b> {row['Benchmark Cases']/case_totals_bench['Benchmark Cases'].sum():.2%}",
+                axis=1
+            )
+
             fig_bench = px.pie(
                 case_totals_bench,
                 values="Benchmark Cases",
@@ -410,7 +446,9 @@ if countries and sum(trip_counts) > 0:
                 title=benchmark_title
             )
             fig_bench.update_traces(textinfo="label+percent", textposition="outside",
-                                    marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)))
+                                    marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)),
+                                    hovertemplate="%{customdata}<extra></extra>",
+                                    customdata=case_totals_bench['hover_text'])
             fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
                                     margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
             st.plotly_chart(fig_bench, use_container_width=True)
@@ -543,13 +581,6 @@ if countries and sum(trip_counts) > 0:
             """)
         
         st.write("")
-        st.markdown("""
-        <p style="font-weight: bold;">
-        These results are just the beginning. The next step is to understand how we can tailor a solution to protect your people and your business.
-        </p>
-        """, unsafe_allow_html=True)
-
-        st.write("")
         st.write("")
 
         st.markdown('---')
@@ -563,7 +594,7 @@ if countries and sum(trip_counts) > 0:
             <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
                 <div style="flex:1; min-width:300px; text-align:center;">
                     <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
-                         alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
+                            alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
                 </div>
                 <div style="flex:1; min-width:300px;">
                     <p style="font-size:16px; line-height:1.6; color:#333;">
@@ -573,9 +604,9 @@ if countries and sum(trip_counts) > 0:
                     </p>
                     <p style="text-align:left; margin-top:20px;">
                         <a href="https://www.internationalsos.com/risk-outlook?utm_source=riskreport" target="_blank"
-                           style="background-color:#2f4696; color:white; font-weight:bold;
-                                  padding:12px 24px; text-decoration:none; border-radius:8px;">
-                            📘 Access the Risk Outlook 2025 Report
+                            style="background-color:#2f4696; color:white; font-weight:bold;
+                                     padding:12px 24px; text-decoration:none; border-radius:8px;">
+                                📘 Access the Risk Outlook 2025 Report
                         </a>
                     </p>
                 </div>
@@ -599,9 +630,9 @@ st.markdown(f"""
     </p>
     <a href="https://www.internationalsos.com/get-in-touch?utm_source=riskreport" target="_blank">
         <button style="background-color:#EF820F; color:white; font-weight:bold; 
-                       border:none; padding:15px 30px; font-size:16px; cursor:pointer; 
-                       margin-top:15px; border-radius:20px;">
-            Get in Touch
+                        border:none; padding:15px 30px; font-size:16px; cursor:pointer; 
+                        margin-top:15px; border-radius:20px;">
+                Get in Touch
         </button>
     </a>
 </div>
