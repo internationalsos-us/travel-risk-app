@@ -484,6 +484,10 @@ if countries and sum(trip_counts) > 0:
             """, unsafe_allow_html=True)
             st.write("")
             
+            # Initialize these variables before use in the conditional statement
+            user_total_cases = user_case_totals_df['Estimated Cases'].sum()
+            global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
+
             if user_total_cases > 0 and global_total_cases > 0:
                 all_higher_risks = []
                 for case_type in user_case_totals_df.index:
