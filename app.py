@@ -675,15 +675,17 @@ if countries and sum(trip_counts) > 0:
         st.write("")
         st.write("")
         st.markdown(f"""
-        <a href="#get-in-touch">
-            <button style="background-color:#EF820F; color:white; font-weight:bold;
-                            border:none; padding:15px 30px; font-size:16px; cursor:pointer;
-                            margin-top:15px; border-radius:20px;">
-                    Talk to an expert
-            </button>
-        </a>
+        <div style="text-align:center;">
+            <a href="#get-in-touch">
+                <button style="background-color:#EF820F; color:white; font-weight:bold;
+                                border:none; padding:15px 30px; font-size:16px; cursor:pointer;
+                                margin-top:15px; border-radius:20px;">
+                        Talk to an expert
+                </button>
+            </a>
+            <p style="font-size:14px; color:#555; margin-top:10px;">Let's discuss your results with an International SOS People Risk Expert.</p>
+        </div>
         """, unsafe_allow_html=True)
-        st.markdown('<p style="font-size:14px; color:#555; margin-top:10px;">Let\'s discuss your results with an International SOS People Risk Expert.</p>', unsafe_allow_html=True)
 
     st.write("")
     st.write("")
