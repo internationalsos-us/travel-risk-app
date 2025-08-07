@@ -587,8 +587,20 @@ if countries and sum(trip_counts) > 0:
             st.markdown('<h4 style="color:#2f4696;">Potential Cost for a Single Case in your Top Risk Areas</h4>', unsafe_allow_html=True)
             st.write("Below is the average potential cost we are seeing for a single case of each of your top risk areas, based on the countries you selected.")
             
-            for risk in higher_risk_messages:
-                case_type = risk['case_type']
+            # The case types to display are the ones in higher_risk_messages
+            display_case_types = [risk['case_type'] for risk in higher_risk_messages]
+            
+            # Filter out the case types that should not be displayed
+            filtered_display_types = [
+                ct for ct in display_case_types if ct not in [
+                    "Travel Information & Analysis",
+                    "Security Referral",
+                    "Security Information & Analysis",
+                    "Medical Information & Analysis"
+                ]
+            ]
+            
+            for case_type in filtered_display_types:
                 cost_col_name = case_type_to_cost_col.get(case_type)
                 
                 if cost_col_name and not cost_data.empty:
@@ -609,7 +621,7 @@ if countries and sum(trip_counts) > 0:
                             st.metric("Potential Cost", f"${max_cost_value:,.2f}")
                         st.write("---") # Separator between risk areas
         else:
-            st.info("No higher risk areas were identified compared to the global average. You can view the overall estimated cost in the table above.")
+            st.info("No higher risk areas were identified compared to the global average.")
             st.write("---")
 
         st.markdown("""
