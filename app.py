@@ -75,6 +75,10 @@ h2, strong, b {
     font-family: Arial, sans-serif;
     font-weight: bold;
 }
+/* New body styling to match website aesthetic */
+body {
+    background-color: #f5f5f5 !important;
+}
 /* Banner with image background and overlay */
 .main-banner {
     position: relative;
@@ -190,6 +194,36 @@ h2, strong, b {
 main {
     padding: 0 15%;
 }
+/* New card-like styling for sections */
+.card-style {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+.card-style-no-padding {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+/* Custom styling for metrics to appear in cards */
+[data-testid="stMetric"] {
+    background-color: #f8f9fa; /* Lighter grey for metric cards */
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    border: 1px solid #e9ecef;
+}
+[data-testid="stMetricLabel"] {
+    font-weight: normal !important;
+    color: #6c757d;
+}
+[data-testid="stMetricValue"] {
+    font-weight: bold !important;
+    color: #212529 !important;
+}
 </style>
 
 <div class="main-banner">
@@ -211,11 +245,13 @@ st.write("")
 # -------------------------
 # Intro Section
 # -------------------------
+st.markdown('<div class="card-style">', unsafe_allow_html=True)
 st.markdown('<h1 style="color:#232762;">Welcome to the International SOS Travel Risk Simulation Tool</h1>', unsafe_allow_html=True)
 st.write("""
 This tool provides a simulation of potential medical and security assistance cases based on your **trip volumes**.
 It uses International SOS proprietary data collected from millions of cases globally.
 """)
+st.write("</div>", unsafe_allow_html=True)
 st.write("")
 st.write("")
 
@@ -227,6 +263,8 @@ st.markdown('<div id="enter-trip-volumes"></div>', unsafe_allow_html=True)
 st.markdown('<h2 style="color:#2f4696;">Enter Trip Volumes</h2>', unsafe_allow_html=True)
 st.write("Select countries and input estimated annual trip volumes. Add more countries if needed.")
 st.write("")
+st.markdown('<div class="card-style-no-padding">', unsafe_allow_html=True)
+st.markdown('<div style="padding: 2rem;">', unsafe_allow_html=True)
 
 countries, trip_counts = [], []
 country_options = sorted(data["Country"].dropna().unique())
@@ -255,6 +293,9 @@ with col_remove:
     if st.session_state.num_rows > 1 and st.button("➖ Remove Last Country"):
         st.session_state.num_rows -= 1
         st.rerun()
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # Region Mapping
@@ -299,7 +340,7 @@ if countries and sum(trip_counts) > 0:
         st.markdown('<div id="estimated-needs"></div>', unsafe_allow_html=True)
         st.markdown('<h2 style="color:#2f4696;">Your Estimated Assistance Needs</h2>', unsafe_allow_html=True)
         st.write("")
-
+        st.markdown('<div class="card-style">', unsafe_allow_html=True)
         col1, col2 = st.columns([1,2])
         with col1:
             st.metric("Total Trips", f"{total_trips:,}")
@@ -310,9 +351,9 @@ if countries and sum(trip_counts) > 0:
                          text=results_df["Total Cases"].round(2),
                          title="Estimated Cases by Country",
                          color_discrete_sequence=["#2f4696", "#232762", "#4a69bd"])
-            fig.update_layout(showlegend=False)
+            fig.update_layout(showlegend=False, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig, use_container_width=True)
-
+        st.markdown('</div>', unsafe_allow_html=True)
         st.write("")
         st.write("")
 
@@ -376,6 +417,7 @@ if countries and sum(trip_counts) > 0:
             case_totals_bench = case_totals_bench.dropna(subset=['Benchmark Cases'])
 
         # Pie Charts
+        st.markdown('<div class="card-style-no-padding">', unsafe_allow_html=True)
         col_user_chart, col_bench_chart = st.columns(2)
         with col_user_chart:
             if filter_country == "All":
@@ -415,7 +457,8 @@ if countries and sum(trip_counts) > 0:
                                    hoverlabel=dict(namelength=-1, # Ensure the full label is shown
                                                    font=dict(size=12)))
             fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
-                                   margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
+                                   margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
+                                   plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_user, use_container_width=True)
 
         with col_bench_chart:
@@ -442,9 +485,10 @@ if countries and sum(trip_counts) > 0:
                                     hoverlabel=dict(namelength=-1,
                                                     font=dict(size=12)))
             fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
-                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
+                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
+                                    plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_bench, use_container_width=True)
-            
+        st.markdown('</div>', unsafe_allow_html=True)
         st.write("")
         st.write("")
         
@@ -477,9 +521,11 @@ if countries and sum(trip_counts) > 0:
             global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
 
         if total_cases < 1:
+            st.markdown('<div class="card-style">', unsafe_allow_html=True)
             st.write(f"""
             Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
             """)
+            st.write("</div>", unsafe_allow_html=True)
             st.write("")
         else:
             if user_total_cases > 0 and global_total_cases > 0:
@@ -502,7 +548,7 @@ if countries and sum(trip_counts) > 0:
 
             if higher_risk_messages:
                 st.markdown("""
-                <div class="risk-alert-box">
+                <div class="risk-alert-box card-style">
                     <p class="risk-alert-title">
                         <span class="alert-icon-circle">🚨</span> Higher Risk Alert: Your exposure is higher than the global average in the following areas:
                     </p>
@@ -569,6 +615,7 @@ if countries and sum(trip_counts) > 0:
         # -------------------------
         # Estimated Cost Breakdown (New Section)
         # -------------------------
+        st.markdown('<div class="card-style">', unsafe_allow_html=True)
         st.markdown('<h3 style="color:#2f4696;">Estimated Cost Breakdown</h3>', unsafe_allow_html=True)
         
         # Mapping of case type display names to cost data column names
@@ -662,6 +709,10 @@ if countries and sum(trip_counts) > 0:
         else:
             st.info("No higher risk areas were identified compared to the global average. However, it does not mean that there is no risk associated with your country selection. All trips carry a level of risk that your organization needs to be ready to face or proactively, mitigate.")
             st.write("---")
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.write("")
+        st.write("")
+
 
         st.markdown("""
         Based on these insights, International SOS can help you:
