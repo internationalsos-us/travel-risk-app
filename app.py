@@ -574,47 +574,61 @@ if countries and sum(trip_counts) > 0:
         # Prepare a DataFrame for costs
         cost_breakdown_df = pd.DataFrame(columns=["Case Type", "Estimated Cases", "Average Cost", "Total Estimated Cost"])
         all_case_types = list(case_type_colors.keys())
+        
+        # Mapping of case type display names to cost data column names
+        case_type_to_cost_col = {
+            "Medical Information & Analysis": "Medical Information & Analysis Average Case Cost",
+            "Medical Out-Patient": "Medical Out-Patient Average Case Cost",
+            "Medical In-Patient": "Medical In-Patient Average Case Cost",
+            "Medical Evacs, Repats, & RMR": "Medical Evacs, Repats, & RMR Average Case Cost",
+            "Security Evacs, Repats, & RMR": "Security Evacs, Repats, & RMR Average Case Cost",
+            "Security Information & Analysis": "Security Information & Analysis Average Case Cost",
+            "Security Referral": "Security Referral Average Case Cost",
+            "Security Interventional Assistance": "Security Interventional Assistance Average Case Cost",
+            "Travel Information & Analysis": "Travel Information & Analysis Average Case Cost"
+        }
+        
+        # A list to store the total estimated cases for an accurate sum
+        cases_for_total = []
 
         for case_type in all_case_types:
-            # Match the column names between the two dataframes
-            cost_col_name = f"{case_type} Average Case Cost"
-            
             # Check if the case type exists in the estimated cases
             if case_type in user_case_totals_df.index:
                 estimated_cases = user_case_totals_df.loc[case_type, 'Estimated Cases']
+                cases_for_total.append(estimated_cases)
                 
-                # Calculate the weighted average cost for the selected countries
-                country_costs = cost_data[cost_data['Country'].isin(countries)]
-                country_trips = results_df[results_df['Country'].isin(countries)]
+                cost_col_name = case_type_to_cost_col.get(case_type)
                 
-                if not country_costs.empty and not country_trips.empty:
-                    # Merge dataframes to get costs and trips for the same countries
-                    merged_df = pd.merge(country_costs, country_trips, on='Country')
+                if cost_col_name and not cost_data.empty:
+                    # Filter cost data for selected countries
+                    country_costs_for_type = cost_data[cost_data['Country'].isin(countries)][cost_col_name]
                     
-                    if cost_col_name in merged_df.columns:
-                        total_cost_per_country = merged_df[cost_col_name] * merged_df[case_type]
-                        total_estimated_cost = total_cost_per_country.sum()
-                        
-                        # Calculate the average cost based on the countries' contributions
-                        if estimated_cases > 0:
-                            weighted_avg_cost = total_estimated_cost / estimated_cases
-                        else:
-                            weighted_avg_cost = 0
-                        
-                        cost_breakdown_df.loc[len(cost_breakdown_df)] = [
-                            case_type,
-                            f"{estimated_cases:.2f}",
-                            f"${weighted_avg_cost:,.2f}",
-                            f"${total_estimated_cost:,.2f}"
-                        ]
+                    # Calculate the weighted average cost for the selected countries
+                    if not country_costs_for_type.empty and estimated_cases > 0:
+                        total_cost = sum(country_costs_for_type.fillna(0) * results_df[case_type])
+                        weighted_avg_cost = total_cost / estimated_cases
+                        total_estimated_cost = total_cost
+                    else:
+                        weighted_avg_cost = 0
+                        total_estimated_cost = 0
+
+                    cost_breakdown_df.loc[len(cost_breakdown_df)] = [
+                        case_type,
+                        f"{estimated_cases:.2f}",
+                        f"${weighted_avg_cost:,.2f}",
+                        f"${total_estimated_cost:,.2f}"
+                    ]
         
         # Add a total row
         total_estimated_costs = cost_breakdown_df['Total Estimated Cost'].str.replace('[\$,]', '', regex=True).astype(float).sum()
-        total_estimated_cases = cost_breakdown_df['Estimated Cases'].astype(float).sum()
+        
+        # The sum of cases from the table might be different from the main total_cases if the columns don't match.
+        # This fixes the total to reflect the sum of the cases in this specific table.
+        total_estimated_cases_table = sum(cases_for_total)
 
         cost_breakdown_df.loc[len(cost_breakdown_df)] = [
             '**TOTAL**', 
-            f"**{total_estimated_cases:.2f}**",
+            f"**{total_estimated_cases_table:.2f}**",
             '', 
             f"**${total_estimated_costs:,.2f}**"
         ]
