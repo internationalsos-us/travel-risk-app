@@ -405,8 +405,8 @@ if countries and sum(trip_counts) > 0:
             # Create custom hover text
             case_totals_user['hover_text'] = case_totals_user.apply(
                 lambda row: f"<b>Case Type:</b> {row['Case Type']}<br>" +
-                            f"<br>{case_type_descriptions.get(row['Case Type'], '')}<br>" +
-                            f"<br><b>Estimated Cases:</b> {row['Estimated Cases']:.2f}",
+                            f"<span style='white-space:normal; width:150px;'>{case_type_descriptions.get(row['Case Type'], '')}</span><br>" +
+                            f"<b>Estimated Cases:</b> {row['Estimated Cases']:.2f}",
                 axis=1
             )
 
@@ -430,8 +430,8 @@ if countries and sum(trip_counts) > 0:
             # Create custom hover text for benchmark chart
             case_totals_bench['hover_text'] = case_totals_bench.apply(
                 lambda row: f"<b>Case Type:</b> {row['Case Type']}<br>" +
-                            f"<br>{case_type_descriptions.get(row['Case Type'], '')}<br>" +
-                            f"<br><b>Benchmark Cases:</b> {row['Benchmark Cases']:.2f}",
+                            f"<span style='white-space:normal; width:150px;'>{case_type_descriptions.get(row['Case Type'], '')}</span><br>" +
+                            f"<b>Benchmark Cases:</b> {row['Benchmark Cases']:.2f}",
                 axis=1
             )
 
