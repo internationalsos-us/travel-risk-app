@@ -68,12 +68,16 @@ st.markdown("""
 html, body, [data-testid="stText"], [data-testid="stMarkdownContainer"] {
     font-family: Arial, sans-serif;
 }
-h1 {
+h1, h2, h3, h4, h5, h6 {
     font-family: "Arial Black", Gadget, sans-serif;
 }
-h2, strong, b {
+strong, b {
     font-family: Arial, sans-serif;
     font-weight: bold;
+}
+/* New body styling to match website aesthetic */
+body {
+    background-color: #f5f5f5 !important;
 }
 /* Banner with image background and overlay */
 .main-banner {
@@ -139,6 +143,12 @@ h2, strong, b {
 .banner-nav {
     display: none; /* Remove menu */
 }
+/* New container to hold main app content */
+.content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
 /* General app styles */
 .toggle-btn {
     padding: 8px 18px;
@@ -162,7 +172,7 @@ h2, strong, b {
     border-left: 5px solid #EF820F; /* Orange border on the left */
     padding: 20px;
     margin: 20px 0;
-    border-radius: 5px;
+    border-radius: 8px; /* Use same border-radius as cards */
 }
 .risk-alert-title {
     font-weight: bold;
@@ -186,9 +196,35 @@ h2, strong, b {
 .stPlotlyChart {
     background-color: transparent !important;
 }
-/* New CSS rule for the page body to create margins */
-main {
-    padding: 0 15%;
+/* New card-like styling for sections */
+.card-style {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+.card-style-no-padding {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+/* Custom styling for metrics to appear in cards */
+[data-testid="stMetric"] {
+    background-color: #f8f9fa; /* Lighter grey for metric cards */
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    border: 1px solid #e9ecef;
+}
+[data-testid="stMetricLabel"] {
+    font-weight: normal !important;
+    color: #6c757d;
+}
+[data-testid="stMetricValue"] {
+    font-weight: bold !important;
+    color: #212529 !important;
 }
 </style>
 
@@ -204,18 +240,24 @@ main {
 </div>
 """, unsafe_allow_html=True)
 
+st.write("")
+st.write("")
 
-st.write("")
-st.write("")
+# -------------------------
+# Main content container
+# -------------------------
+st.markdown('<div class="content-container">', unsafe_allow_html=True)
 
 # -------------------------
 # Intro Section
 # -------------------------
+st.markdown('<div class="card-style">', unsafe_allow_html=True)
 st.markdown('<h1 style="color:#232762;">Welcome to the International SOS Travel Risk Simulation Tool</h1>', unsafe_allow_html=True)
 st.write("""
 This tool provides a simulation of potential medical and security assistance cases based on your **trip volumes**.
 It uses International SOS proprietary data collected from millions of cases globally.
 """)
+st.markdown("</div>", unsafe_allow_html=True)
 st.write("")
 st.write("")
 
@@ -227,7 +269,7 @@ st.markdown('<div id="enter-trip-volumes"></div>', unsafe_allow_html=True)
 st.markdown('<h2 style="color:#2f4696;">Enter Trip Volumes</h2>', unsafe_allow_html=True)
 st.write("Select countries and input estimated annual trip volumes. Add more countries if needed.")
 st.write("")
-
+st.markdown('<div class="card-style">', unsafe_allow_html=True)
 countries, trip_counts = [], []
 country_options = sorted(data["Country"].dropna().unique())
 
@@ -255,6 +297,10 @@ with col_remove:
     if st.session_state.num_rows > 1 and st.button("➖ Remove Last Country"):
         st.session_state.num_rows -= 1
         st.rerun()
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.write("")
+st.write("")
 
 # -------------------------
 # Region Mapping
@@ -299,7 +345,7 @@ if countries and sum(trip_counts) > 0:
         st.markdown('<div id="estimated-needs"></div>', unsafe_allow_html=True)
         st.markdown('<h2 style="color:#2f4696;">Your Estimated Assistance Needs</h2>', unsafe_allow_html=True)
         st.write("")
-
+        st.markdown('<div class="card-style">', unsafe_allow_html=True)
         col1, col2 = st.columns([1,2])
         with col1:
             st.metric("Total Trips", f"{total_trips:,}")
@@ -310,9 +356,9 @@ if countries and sum(trip_counts) > 0:
                          text=results_df["Total Cases"].round(2),
                          title="Estimated Cases by Country",
                          color_discrete_sequence=["#2f4696", "#232762", "#4a69bd"])
-            fig.update_layout(showlegend=False)
+            fig.update_layout(showlegend=False, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig, use_container_width=True)
-
+        st.markdown('</div>', unsafe_allow_html=True)
         st.write("")
         st.write("")
 
@@ -376,6 +422,7 @@ if countries and sum(trip_counts) > 0:
             case_totals_bench = case_totals_bench.dropna(subset=['Benchmark Cases'])
 
         # Pie Charts
+        st.markdown('<div class="card-style">', unsafe_allow_html=True)
         col_user_chart, col_bench_chart = st.columns(2)
         with col_user_chart:
             if filter_country == "All":
@@ -414,8 +461,9 @@ if countries and sum(trip_counts) > 0:
                                    customdata=case_totals_user['hover_text'],
                                    hoverlabel=dict(namelength=-1, # Ensure the full label is shown
                                                    font=dict(size=12)))
-            fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
-                                   margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
+            fig_user.update_layout(showlegend=False, 
+                                   margin=dict(t=50, b=50, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
+                                   plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_user, use_container_width=True)
 
         with col_bench_chart:
@@ -441,10 +489,11 @@ if countries and sum(trip_counts) > 0:
                                     customdata=case_totals_bench['hover_text'],
                                     hoverlabel=dict(namelength=-1,
                                                     font=dict(size=12)))
-            fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
-                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide')
+            fig_bench.update_layout(showlegend=False,
+                                    margin=dict(t=50, b=50, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
+                                    plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_bench, use_container_width=True)
-            
+        st.markdown('</div>', unsafe_allow_html=True)
         st.write("")
         st.write("")
         
@@ -455,7 +504,7 @@ if countries and sum(trip_counts) > 0:
         # -------------------------
         st.markdown('<h2 style="color:#2f4696;">What These Results Mean for You</h2>', unsafe_allow_html=True)
         st.write("")
-
+        
         # Calculate global benchmark for comparison
         global_avg_prob = data[case_columns].mean()
         global_benchmark_cases_df = (global_avg_prob * total_trips).to_frame(name="Benchmark Cases")
@@ -471,26 +520,17 @@ if countries and sum(trip_counts) > 0:
         user_total_cases = 0
         global_total_cases = 0
 
-
-        if total_cases < 1:
-            st.write(f"""
-            Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
-            """)
-            st.write("")
-        else:
-            st.markdown("""
-            <div class="risk-alert-box">
-                <p class="risk-alert-title">
-                    <span class="alert-icon-circle">🚨</span> Higher Risk Alert: Your exposure is higher than the global average in the following areas:
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-            st.write("")
-            
-            # Initialize these variables before use in the conditional statement
+        # Calculate user_total_cases and global_total_cases only if results_df is not empty
+        if not results_df.empty and results_df["Total Cases"].sum() > 0:
             user_total_cases = user_case_totals_df['Estimated Cases'].sum()
             global_total_cases = global_benchmark_cases_df['Benchmark Cases'].sum()
 
+        if total_cases < 1:
+            st.markdown('<div class="card-style">', unsafe_allow_html=True)
+            st.write(f"""
+            Your simulation of **{total_trips:,} trips** to **{countries_list_str}** indicates a relatively low number of estimated cases. While this is positive, it doesn’t mean the risk is zero. Even a single incident can cause significant disruption for your traveler and your business.
+            """)
+        else:
             if user_total_cases > 0 and global_total_cases > 0:
                 all_higher_risks = []
                 for case_type in user_case_totals_df.index:
@@ -503,20 +543,21 @@ if countries and sum(trip_counts) > 0:
                             risk_multiple = user_percentage / global_percentage
                             all_higher_risks.append({'case_type': case_type, 'risk_multiple': risk_multiple})
                 
-                # Filter out the case types that should not be displayed in the cost section
-                excluded_types = [
-                    "Travel Information & Analysis",
-                    "Security Referral",
-                    "Security Information & Analysis",
-                    "Medical Information & Analysis"
-                ]
-                
-                filtered_higher_risks = [risk for risk in all_higher_risks if risk['case_type'] not in excluded_types]
-                
-                sorted_risks = sorted(filtered_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
+                sorted_risks = sorted(all_higher_risks, key=lambda x: x['risk_multiple'], reverse=True)
                 higher_risk_messages = sorted_risks[:3]
+            else:
+                higher_risk_messages = []
+
 
             if higher_risk_messages:
+                st.markdown("""
+                <div class="risk-alert-box">
+                    <p class="risk-alert-title">
+                        <span class="alert-icon-circle">🚨</span> Higher Risk Alert: Your exposure is higher than the global average in the following areas:
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+                st.write("")
                 # Prepare a DataFrame for the horizontal bar chart
                 chart_data = pd.DataFrame(higher_risk_messages)
                 chart_data['risk_multiple'] = chart_data['risk_multiple'].round(1)
@@ -577,6 +618,7 @@ if countries and sum(trip_counts) > 0:
         # -------------------------
         # Estimated Cost Breakdown (New Section)
         # -------------------------
+        st.markdown('<div class="card-style">', unsafe_allow_html=True)
         st.markdown('<h3 style="color:#2f4696;">Estimated Cost Breakdown</h3>', unsafe_allow_html=True)
         
         # Mapping of case type display names to cost data column names
@@ -589,20 +631,65 @@ if countries and sum(trip_counts) > 0:
             "Security Information & Analysis": "Security Information & Analysis Average Case Cost",
             "Security Referral": "Security Referral Average Case Cost",
             "Security Interventional Assistance": "Security Interventional Assistance Average Case Cost",
-            "Security Evacuation": "Security Evacuation Average Case Cost",
+            "Security Evacuation": "Security Evacs, Repats, & RMR Average Case Cost", # Corrected column name
             "Travel Information & Analysis": "Travel Information & Analysis Average Case Cost"
         }
         
-        # Display breakdown for top 3 risks
-        if higher_risk_messages:
+        # Define the list of excluded case types for the cost breakdown section
+        excluded_types_for_cost = [
+            "Travel Information & Analysis",
+            "Security Referral",
+            "Security Information & Analysis",
+            "Medical Information & Analysis"
+        ]
+
+        # Get all higher risk areas
+        all_higher_risks_full_list = []
+        if user_total_cases > 0 and global_total_cases > 0:
+            for case_type in user_case_totals_df.index:
+                user_percentage = user_case_totals_df.loc[case_type, 'Estimated Cases'] / user_total_cases
+                if case_type in global_benchmark_cases_df.index:
+                    global_percentage = global_benchmark_cases_df.loc[case_type, 'Benchmark Cases'] / global_total_cases
+                    if user_percentage > global_percentage:
+                        all_higher_risks_full_list.append(case_type)
+        
+        # Now, construct the list of case types to display in the cost section
+        displayed_cost_risks = []
+        
+        # 1. Prioritize top 3 higher risks that are not excluded
+        for risk in all_higher_risks_full_list:
+            if risk not in excluded_types_for_cost and len(displayed_cost_risks) < 3:
+                displayed_cost_risks.append(risk)
+
+        # 2. If there are fewer than 3, fill the remaining slots with the highest cost items
+        if len(displayed_cost_risks) < 3:
+            all_potential_cost_items = []
+            
+            # Find the highest average cost for each non-excluded case type among selected countries
+            for case_type_display in case_type_to_cost_col.keys():
+                if case_type_display not in excluded_types_for_cost and case_type_display not in displayed_cost_risks:
+                    cost_col_name = case_type_to_cost_col.get(case_type_display)
+                    if cost_col_name in cost_data.columns:
+                        country_costs_for_type = cost_data[cost_data['Country'].isin(countries)][cost_col_name].dropna()
+                        
+                        if not country_costs_for_type.empty:
+                            max_cost = country_costs_for_type.max()
+                            all_potential_cost_items.append({'case_type': case_type_display, 'cost': max_cost})
+
+            # Sort by cost descending
+            all_potential_cost_items.sort(key=lambda x: x['cost'], reverse=True)
+            
+            # Add to the display list, avoiding duplicates
+            for item in all_potential_cost_items:
+                if len(displayed_cost_risks) < 3:
+                    displayed_cost_risks.append(item['case_type'])
+        
+        # Display breakdown for the selected cost areas
+        if displayed_cost_risks:
             st.markdown('<h4 style="color:#2f4696;">Potential Cost for a Single Case in your Top Risk Areas</h4>', unsafe_allow_html=True)
             st.write("Below is the average potential cost we are seeing for a single case of each of your top risk areas, based on the countries you selected.")
             
-            # The case types to display are the ones in higher_risk_messages
-            display_case_types = [risk['case_type'] for risk in higher_risk_messages]
-            
-            
-            for case_type in display_case_types:
+            for case_type in displayed_cost_risks:
                 cost_col_name = case_type_to_cost_col.get(case_type)
                 
                 if cost_col_name and not cost_data.empty:
@@ -623,50 +710,69 @@ if countries and sum(trip_counts) > 0:
                             st.metric("Potential Cost", f"${max_cost_value:,.2f}")
                         st.write("---") # Separator between risk areas
         else:
-            st.info("No higher risk areas were identified compared to the global average.")
+            st.info("No higher risk areas were identified compared to the global average. However, it does not mean that there is no risk associated with your country selection. All trips carry a level of risk that your organization needs to be ready to face or proactively, mitigate.")
             st.write("---")
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.write("")
+        st.write("")
 
+
+        # This section is now no longer conditional
         st.markdown("""
         Based on these insights, International SOS can help you:
         - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
-        - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
+        - **Empowering Your Travelers:** What if they had **24/7 access** to on-demand medical and security advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
         - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
         - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
         """)
-    
-    st.write("")
-    st.write("")
-    
-    st.markdown('---')
-    st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html=True)
-    # -------------------------
-    # Risk Outlook section
-    # -------------------------
-    st.markdown("""
-    <div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
-        <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
-        <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
-            <div style="flex:1; min-width:300px; text-align:center;">
-                <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
-                        alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
-            </div>
-            <div style="flex:1; min-width:300px;">
-                <p style="font-size:16px; line-height:1.6; color:#333;">
-                    The <b>Risk Outlook 2025</b> is our flagship annual study, providing actionable insights into the key medical and security
-                    challenges facing organizations worldwide. Developed with expert analysis and global data, it helps leaders prepare
-                    for the unexpected and safeguard their workforce.
-                </p>
-                <p style="text-align:left; margin-top:20px;">
-                    <a href="https://www.internationalsos.com/risk-outlook?utm_source=riskreport" target="_blank"
-                        style="background-color:#2f4696; color:white; font-weight:bold;
-                                 padding:12px 24px; text-decoration:none; border-radius:8px;">
-                            📘 Access the Risk Outlook 2025 Report
-                    </a>
-                </p>
-            </div>
+        st.write("")
+        st.markdown(f"""
+        <div style="text-align:center;">
+            <a href="#get-in-touch">
+                <button style="background-color:#EF820F; color:white; font-weight:bold;
+                                border:none; padding:15px 30px; font-size:16px; cursor:pointer;
+                                margin-top:15px; border-radius:20px;">
+                        Talk to an expert
+                </button>
+            </a>
+            <p style="font-size:14px; color:#555; margin-top:10px;">Let's discuss your results with an International SOS People Risk Expert.</p>
+        </div>
+        """, unsafe_allow_html_true)
+    st.markdown('</div>', unsafe_allow_html_true)
+
+st.write("")
+st.write("")
+
+st.markdown('---')
+st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html_true)
+# -------------------------
+# Risk Outlook section
+# -------------------------
+st.markdown("""
+<div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
+    <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
+    <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:300px; text-align:center;">
+            <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
+                    alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
+        </div>
+        <div style="flex:1; min-width:300px;">
+            <p style="font-size:16px; line-height:1.6; color:#333;">
+                The <b>Risk Outlook 2025</b> is our flagship annual study, providing actionable insights into the key medical and security
+                challenges facing organizations worldwide. Developed with expert analysis and global data, it helps leaders prepare
+                for the unexpected and safeguard their workforce.
+            </p>
+            <p style="text-align:left; margin-top:20px;">
+                <a href="https://www.internationalsos.com/risk-outlook?utm_source=riskreport" target="_blank"
+                    style="background-color:#2f4696; color:white; font-weight:bold;
+                             padding:12px 24px; text-decoration:none; border-radius:8px;">
+                        📘 Access the Risk Outlook 2025 Report
+                </a>
+            </p>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 st.markdown('---')
 st.write("")
 
@@ -690,7 +796,7 @@ st.markdown(f"""
         </button>
     </a>
 </div>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html_true)
 
 st.write("")
 st.write("")
@@ -700,4 +806,4 @@ st.markdown("""
 <div style="text-align:center; font-size:12px; color:gray; margin-top:20px;">
 © 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.
 </div>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html_true)
