@@ -468,6 +468,9 @@ if countries and sum(trip_counts) > 0:
         
         # Initialize higher_risk_messages as an empty list to prevent the NameError
         higher_risk_messages = []
+        user_total_cases = 0
+        global_total_cases = 0
+
 
         if total_cases < 1:
             st.write(f"""
