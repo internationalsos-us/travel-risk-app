@@ -68,10 +68,10 @@ st.markdown("""
 html, body, [data-testid="stText"], [data-testid="stMarkdownContainer"] {
     font-family: Arial, sans-serif;
 }
-h1 {
+h1, h2, h3, h4, h5, h6 {
     font-family: "Arial Black", Gadget, sans-serif;
 }
-h2, strong, b {
+strong, b {
     font-family: Arial, sans-serif;
     font-weight: bold;
 }
