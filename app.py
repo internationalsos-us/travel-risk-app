@@ -422,7 +422,7 @@ if countries and sum(trip_counts) > 0:
             case_totals_bench = case_totals_bench.dropna(subset=['Benchmark Cases'])
 
         # Pie Charts
-        st.markdown('<div class="card-style-no-padding">', unsafe_allow_html=True)
+        st.markdown('<div class="card-style">', unsafe_allow_html=True)
         col_user_chart, col_bench_chart = st.columns(2)
         with col_user_chart:
             if filter_country == "All":
@@ -462,7 +462,7 @@ if countries and sum(trip_counts) > 0:
                                    hoverlabel=dict(namelength=-1, # Ensure the full label is shown
                                                    font=dict(size=12)))
             fig_user.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
-                                   margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
+                                   margin=dict(t=50, b=150, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
                                    plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_user, use_container_width=True)
 
@@ -490,7 +490,7 @@ if countries and sum(trip_counts) > 0:
                                     hoverlabel=dict(namelength=-1,
                                                     font=dict(size=12)))
             fig_bench.update_layout(showlegend=True, legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center"),
-                                    margin=dict(t=50, b=100, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
+                                    margin=dict(t=50, b=150, l=50, r=50), uniformtext_minsize=12, uniformtext_mode='hide',
                                     plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_bench, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
