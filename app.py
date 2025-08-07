@@ -52,16 +52,16 @@ case_type_services = {
 # Mapping of Case Types to Descriptions
 # -------------------------
 case_type_descriptions = {
-    "Medical Information & Analysis": "(i.e. Emergency and routine medical advice, First aid advice, Travel health & inoculation advice, Inflight medical advice etc.)",
-    "Medical Out-Patient": "(When the patient receives medical services for the purpose of diagnosis or treatment and is not admitted as an inpatient by the treating physician.)",
-    "Medical In-Patient": "(i.e. Arrangement of Admission, Identifying Treating Doctor for Hospitalization, Medical contacts by the Medical Team with the treating doctors during or after patient's hospitalization)",
-    "Medical Evacs, Repats, & RMR": "(Arrangement for air and/or surface transportation, medical care during transportation and communications for a patient as well as the transportation of the patient’s mortal remains)",
-    "Security Evacs, Repats, & RMR": "(Arrangement for air and/or surface transportation and communications for a patient as well as transportation of the patient’s mortal remains)",
-    "Security Information & Analysis": "(i.e. Risk assessments, Travel security advice, Country-specific threat levels, Pre-travel briefings, Intelligence on protests, crime, terrorism, political instability, or other emerging threats)",
-    "Security Referral": "(i.e. Connection to vetted security providers, Secure ground transportation, Vetted accommodation, Security escorts, Local security consultancy, Risk mitigation services through third-party partners)",
-    "Security Interventional Assistance": "(i.e. On-the-ground security guidance during an incident, Advice on shelter-in-place vs. evacuation, Emergency relocation coordination, Active threat monitoring, Coordination with local response services, Immediate support during unrest, crime, or crisis)",
-    "Security Evacuation": "(i.e. Extraction from high-risk environments, Evacuation due to conflict, terrorism, or natural disaster with security implications, Charter flight coordination, Secure ground movement out of danger zones, Coordination with embassies or insurers for evacuation)",
-    "Travel Information & Analysis": "(Any service rendered relating to travel including pre-trip.)"
+    "Medical Information & Analysis": "i.e. Emergency and routine medical advice, First aid advice, Travel health & inoculation advice, Inflight medical advice etc.",
+    "Medical Out-Patient": "When the patient receives medical services for the purpose of diagnosis or treatment and is not admitted as an inpatient by the treating physician.",
+    "Medical In-Patient": "i.e. Arrangement of Admission, Identifying Treating Doctor for Hospitalization, Medical contacts by the Medical Team with the treating doctors during or after patient's hospitalization",
+    "Medical Evacs, Repats, & RMR": "Arrangement for air and/or surface transportation, medical care during transportation and communications for a patient as well as the transportation of the patient’s mortal remains",
+    "Security Evacs, Repats, & RMR": "Arrangement for air and/or surface transportation and communications for a patient as well as transportation of the patient’s mortal remains",
+    "Security Information & Analysis": "i.e. Risk assessments, Travel security advice, Country-specific threat levels, Pre-travel briefings, Intelligence on protests, crime, terrorism, political instability, or other emerging threats",
+    "Security Referral": "i.e. Connection to vetted security providers, Secure ground transportation, Vetted accommodation, Security escorts, Local security consultancy, Risk mitigation services through third-party partners",
+    "Security Interventional Assistance": "i.e. On-the-ground security guidance during an incident, Advice on shelter-in-place vs. evacuation, Emergency relocation coordination, Active threat monitoring, Coordination with local response services, Immediate support during unrest, crime, or crisis",
+    "Security Evacuation": "i.e. Extraction from high-risk environments, Evacuation due to conflict, terrorism, or natural disaster with security implications, Charter flight coordination, Secure ground movement out of danger zones, Coordination with embassies or insurers for evacuation)",
+    "Travel Information & Analysis": "Any service rendered relating to travel including pre-trip."
 }
 
 # -------------------------
@@ -405,9 +405,8 @@ if countries and sum(trip_counts) > 0:
             # Create custom hover text
             case_totals_user['hover_text'] = case_totals_user.apply(
                 lambda row: f"<b>Case Type:</b> {row['Case Type']}<br>" +
-                            f"{case_type_descriptions.get(row['Case Type'], '')}<br>" +
-                            f"<b>Estimated Cases:</b> {row['Estimated Cases']:.2f}<br>" +
-                            f"<b>Percentage:</b> {row['Estimated Cases']/case_totals_user['Estimated Cases'].sum():.2%}",
+                            f"<br>{case_type_descriptions.get(row['Case Type'], '')}<br>" +
+                            f"<br><b>Estimated Cases:</b> {row['Estimated Cases']:.2f}",
                 axis=1
             )
 
@@ -431,9 +430,8 @@ if countries and sum(trip_counts) > 0:
             # Create custom hover text for benchmark chart
             case_totals_bench['hover_text'] = case_totals_bench.apply(
                 lambda row: f"<b>Case Type:</b> {row['Case Type']}<br>" +
-                            f"{case_type_descriptions.get(row['Case Type'], '')}<br>" +
-                            f"<b>Benchmark Cases:</b> {row['Benchmark Cases']:.2f}<br>" +
-                            f"<b>Percentage:</b> {row['Benchmark Cases']/case_totals_bench['Benchmark Cases'].sum():.2%}",
+                            f"<br>{case_type_descriptions.get(row['Case Type'], '')}<br>" +
+                            f"<br><b>Benchmark Cases:</b> {row['Benchmark Cases']:.2f}",
                 axis=1
             )
 
@@ -484,7 +482,7 @@ if countries and sum(trip_counts) > 0:
             - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
             - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
             - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
-            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
+            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         else:
             st.markdown("""
@@ -577,7 +575,7 @@ if countries and sum(trip_counts) > 0:
             - **Proactive Risk Management:** Instead of reacting to a crisis, imagine proactively identifying and managing risks in real time. Our **Risk Information Services** and **Quantum** digital platform can monitor global threats for you, keeping your travelers ahead of potential incidents.
             - **Empowering Your Travelers:** Your travelers are your most valuable asset. What if they had **24/7 access** to on-demand medical advice from a qualified doctor or a security expert, no matter where they are? This support helps them feel confident and secure, fulfilling your **Duty of Care** responsibilities.
             - **Ensuring Business Continuity:** When an incident occurs, time is critical. Our **evacuation and repatriation services** are not just a plan; they are a rapid response network that ensures your employees can be moved quickly and safely. This minimizes disruption and protects your business.
-            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international standards like **ISO 31030**, ensuring your program is both effective and compliant.
+            - **Building a Resilient Program:** Beyond a quick fix, we help you build a robust, future-proof travel risk management program. We help you align with international guidelines like **ISO 31030**, ensuring your program is both effective and compliant.
             """)
         
         st.write("")
