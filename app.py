@@ -737,14 +737,14 @@ if countries and sum(trip_counts) > 0:
             </a>
             <p style="font-size:14px; color:#555; margin-top:10px;">Let's discuss your results with an International SOS People Risk Expert.</p>
         </div>
-        """, unsafe_allow_html_true)
-    st.markdown('</div>', unsafe_allow_html_true)
+        """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 st.write("")
 st.write("")
 
 st.markdown('---')
-st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html_true)
+st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html=True)
 # -------------------------
 # Risk Outlook section
 # -------------------------
@@ -796,7 +796,7 @@ st.markdown(f"""
         </button>
     </a>
 </div>
-""", unsafe_allow_html_true)
+""", unsafe_allow_html=True)
 
 st.write("")
 st.write("")
@@ -806,4 +806,4 @@ st.markdown("""
 <div style="text-align:center; font-size:12px; color:gray; margin-top:20px;">
 © 2025 International SOS. WORLDWIDE REACH. HUMAN TOUCH.
 </div>
-""", unsafe_allow_html_true)
+""", unsafe_allow_html=True)
