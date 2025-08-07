@@ -760,22 +760,23 @@ if countries and sum(trip_counts) > 0:
             <p style="font-size:14px; color:#555; margin-top:10px;">Let's discuss your results with an International SOS People Risk Expert.</p>
         </div>
         """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.write("")
-    st.write("")
-    
-    st.markdown('---')
-    st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html=True)
-    # -------------------------
-    # Risk Outlook section
-    # -------------------------
-    st.markdown("""
-    <div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
-        <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
-        <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
-            <div style="flex:1; min-width:300px; text-align:center;">
-                <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
-                        alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
+st.write("")
+st.write("")
+
+st.markdown('---')
+st.markdown('<div id="risk-outlook"></div>', unsafe_allow_html=True)
+# -------------------------
+# Risk Outlook section
+# -------------------------
+st.markdown("""
+<div style="background-color:#f5f5f5; padding:40px; margin-top:40px; margin-bottom:40px;">
+    <h2 style="text-align:center; color:#232762;">Explore the Risk Outlook 2025 Report</h2>
+    <div style="display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:300px; text-align:center;">
+            <img src="https://cdn1.internationalsos.com/-/jssmedia/risk-outlook-2025-report.png?w=800&h=auto&mw=800&rev=60136b946e6f46d1a8c9a458213730a7"
+                    alt="Risk Outlook 2025" style="max-width:100%; height:auto; border-radius:8px;">
         </div>
         <div style="flex:1; min-width:300px;">
             <p style="font-size:16px; line-height:1.6; color:#333;">
